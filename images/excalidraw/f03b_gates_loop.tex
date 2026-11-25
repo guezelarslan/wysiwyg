@@ -1,0 +1,47 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{20}
+\renewcommand{\skbendA}{2}
+\renewcommand{\skbendB}{3.5}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{37}
+  % four gates
+  \skbox{(0,0)}{(440,145)}
+  \node[title] at (220,52) {D};
+  \node[note]  at (220,108) {domain};
+
+  \skbox[Plane]{(760,0)}{(1280,145)}
+  \node[title] at (1020,52) {S};
+  \node[note]  at (1020,108) {semantic model};
+
+  \skbox[Plane]{(1600,0)}{(2060,145)}
+  \node[title] at (1830,52) {P};
+  \node[note]  at (1830,108) {program};
+
+  \skbox[Shade]{(2380,0)}{(2840,145)}
+  \node[title] at (2610,52) {B};
+  \node[note]  at (2610,108) {behaviour};
+
+  % forward gates
+  \skarrow{(460,72)}{(740,72)}
+  \node[note] at (600,26) {interpret};
+
+  \skarrow{(1300,72)}{(1580,72)}
+  \node[note] at (1440,26) {formalise};
+
+  \skarrow{(2080,72)}{(2360,72)}
+  \node[note] at (2220,26) {execute};
+
+  % return path from B back to S
+  \draw[line width=1.15pt, draw=Ink, line cap=round,
+        -{Straight Barb[length=7pt, width=9pt, line width=1.15pt]}]
+    (2610,165) .. controls (2610,355) and (1020,355) .. (1020,165);
+  \draw[line width=0.85pt, draw=Ink, opacity=0.65, line cap=round]
+    (2610,165) .. controls (2600,367) and (1030,367) .. (1020,165);
+  \node[note, fill=white, inner sep=4pt] at (1815,310)
+    {surprises, workarounds, hard code = evidence about S (new Silence)};
+\end{tikzpicture}
+\end{document}

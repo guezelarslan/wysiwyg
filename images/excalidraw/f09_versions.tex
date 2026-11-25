@@ -1,0 +1,43 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{17}
+\renewcommand{\titlesize}{22}
+\renewcommand{\skbendA}{1}
+\renewcommand{\skbendB}{1.6}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{97}
+  % regimes
+  \node[title] at (925,-330)  {Tong: flow};
+  \node[title] at (2625,-330) {Dui: cut};
+  \sk[thin]{(760,-290) -- (1090,-295)}
+  \sk[thin]{(2490,-290) -- (2760,-295)}
+  \draw[dashed box] (1775,-380) -- (1775,600);
+
+  % versions of model and context
+  \Mini{550}{0}{model v1}{context v1}
+  \Mini{1300}{0}{model v2}{context v2}
+  \Mini{2250}{0}{model v3}{context v3}
+  \Mini{3000}{0}{model vn}{context vn}
+
+  % process
+  \node[title] at (925,185)  {Scrum};
+  \node[title] at (2625,185) {no Scrum};
+
+  % the handover
+  \node[note] at (1775,285) {Agile Manifesto: left hands over to right};
+  \skarrow{(1100,345)}{(2450,345)}
+
+  % coordination
+  \node[title] at (925,450)  {network};
+  \node[title] at (2625,450) {hierarchy};
+
+  % variety must match variety, on both sides
+  \node[title, fill=white, inner sep=4pt] at (1775,550) {Ashby's law};
+
+  % time
+  \skarrow{(0,660)}{(3250,660)}
+  \node[note, anchor=west] at (3280,660) {time};
+\end{tikzpicture}
+\end{document}

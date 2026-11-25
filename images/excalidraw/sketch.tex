@@ -1,0 +1,130 @@
+%% Shared Excalidraw-style drawing kit for the WYSIWYG figures.
+%% Coordinates are in "pixels" of the original PNGs (x right, y down).
+\usepackage{fontspec}
+\newfontfamily\virgil{FG_Virgil.ttf}[Path=../../fonts/]
+\usetikzlibrary{decorations.pathmorphing,calc,arrows.meta}
+
+\definecolor{Ink}{gray}{0.10}
+\definecolor{Hidden}{gray}{0.55}
+\definecolor{Plane}{gray}{0.95}
+\definecolor{Shade}{gray}{0.88}
+
+% Font sizes in pt; a figure may \renewcommand them before drawing.
+\newcommand{\labelsize}{17}
+\newcommand{\smallsize}{14}
+\newcommand{\titlesize}{20}
+
+\tikzset{
+  x=0.01cm, y=-0.01cm,
+  rough/.style={decorate, decoration={random steps, segment length=10pt, amplitude=0.7pt},
+                line join=round, line cap=round, draw=Ink},
+  bold/.style={rough, line width=1.25pt},
+  thin/.style={rough, line width=0.8pt},
+  dotted sketch/.style={rough, line width=1.2pt, dash pattern=on 0.1pt off 2.6pt},
+  hidden sketch/.style={rough, line width=0.7pt, draw=Hidden, dash pattern=on 0.1pt off 2.2pt},
+  dashed box/.style={rough, line width=1.1pt, dash pattern=on 6pt off 4pt},
+  label/.style={font=\virgil\fontsize{\labelsize}{\labelsize}\selectfont, text=Ink, anchor=east, inner sep=0pt},
+  labelR/.style={label, anchor=west},
+  note/.style={font=\virgil\fontsize{\smallsize}{\smallsize}\selectfont, text=Ink, inner sep=0pt, align=center},
+  noteR/.style={note, anchor=west, align=left},
+  title/.style={font=\virgil\fontsize{\titlesize}{\titlesize}\selectfont, text=Ink, inner sep=0pt},
+}
+
+% Two slightly different passes, like Excalidraw's default "artist" roughness.
+\newcommand{\sk}[2][]{\draw[#1] #2; \draw[#1, opacity=0.8] #2;}
+
+% \skellipse[style]{centre}{x radius}{y radius}: two offset, slightly rotated passes
+% (random steps would flatten small ellipses into polygons).
+\newcommand{\skellipse}[4][]{%
+  \draw[line cap=round, draw=Ink, #1, rotate around={1.5:#2}] #2 ellipse [x radius=#3+1, y radius=#4-1];
+  \draw[line cap=round, draw=Ink, #1, opacity=0.8, rotate around={-2:#2}] #2 ellipse [x radius=#3-1, y radius=#4+1];
+}
+
+% \skarrow[style]{from}{to}: a slightly bent stroke with an open Excalidraw arrowhead.
+% Bends are angles, so long arrows need smaller values (\renewcommand them).
+\newcommand{\skbendA}{3}
+\newcommand{\skbendB}{5}
+\newcommand{\skarrow}[3][]{%
+  \draw[line width=1.15pt, draw=Ink, line cap=round,
+        -{Straight Barb[length=7pt, width=9pt, line width=1.15pt]}, #1] #2 to[bend left=\skbendA] #3;
+  \draw[line width=0.9pt, draw=Ink, line cap=round, opacity=0.7, #1] #2 to[bend left=\skbendB] #3;
+}
+
+% \skbox[fill]{corner}{opposite corner}: a rounded, hand-drawn rectangle.
+\newcommand{\skbox}[3][white]{%
+  \fill[#1, rounded corners=6pt] #2 rectangle #3;
+  \sk[bold, rounded corners=4pt]{#2 rectangle #3}
+}
+
+% Cross-hatched disc: the model sitting on its plane.
+\newcommand{\Disc}[3]{% centre, x radius, y radius
+  \fill[white] #1 ellipse [x radius=#2, y radius=#3];
+  \begin{scope}
+    \clip #1 ellipse [x radius=#2, y radius=#3];
+    \foreach \i in {-110,-98,...,110}
+      \draw[thin] ($#1+(\i-30,30)$) -- ++(60,-60);
+    \foreach \i in {-110,-98,...,110}
+      \draw[thin] ($#1+(\i-30,-30)$) -- ++(60,60);
+  \end{scope}
+  \skellipse[line width=1.25pt]{#1}{#2}{#3}
+}
+
+% \StackBody{dx}{dy}: a disc (model/language/code) resting on a framed plane
+% (context/runtime) that projects a box onto a larger ground plane (reality/machine).
+\newcommand{\StackBody}[2]{%
+  \begin{scope}[shift={(#1,#2)}]
+    % ground plane
+    \fill[white] (175,275) -- (750,190) -- (960,325) -- (385,410) -- cycle;
+    \sk[bold]{(175,275) -- (750,190) -- (960,325) -- (385,410) -- cycle}
+    % footprint of the context on the ground
+    \draw[hidden sketch] (370,280) -- (605,245) -- (710,310);
+    \draw[dotted sketch] (370,280) -- (465,345) -- (710,310);
+    % drop lines from the context plane
+    \draw[dotted sketch] (370,175) -- (370,280);
+    \draw[dotted sketch] (465,240) -- (465,345);
+    \draw[dotted sketch] (710,205) -- (710,310);
+    % context plane
+    \fill[Plane] (370,175) -- (605,140) -- (710,205) -- (465,240) -- cycle;
+    \sk[bold]{(370,175) -- (605,140) -- (710,205) -- (465,240) -- cycle}
+    % shadow of the model on the context
+    \draw[line width=0.8pt, draw=Ink, dash pattern=on 4pt off 3pt] (540,190) ellipse [x radius=70, y radius=20];
+    % model column and disc
+    \draw[dotted sketch] (468,106) -- (468,190);
+    \draw[dotted sketch] (612,106) -- (612,190);
+    \Disc{(540,105)}{72}{22}
+  \end{scope}%
+}
+
+% \Stack{dx}{dy}{top}{plane}{ground}: labels on the left.
+\newcommand{\Stack}[5]{%
+  \StackBody{#1}{#2}%
+  \begin{scope}[shift={(#1,#2)}]
+    \node[label] at (436,76)  {#3};
+    \node[label] at (330,152) {#4};
+    \node[label] at (152,252) {#5};
+  \end{scope}%
+}
+
+% \StackR{dx}{dy}{top}{plane}{ground}: labels on the right.
+\newcommand{\StackR}[5]{%
+  \StackBody{#1}{#2}%
+  \begin{scope}[shift={(#1,#2)}]
+    \node[labelR] at (640,90)  {#3};
+    \node[labelR] at (790,200) {#4};
+    \node[labelR] at (985,330) {#5};
+  \end{scope}%
+}
+
+% \Mini{cx}{cy}{top}{plane}: a model disc on its context plane, without ground.
+\newcommand{\Mini}[4]{%
+  \begin{scope}[shift={(#1,#2)}]
+    \fill[Plane] (-170,-15) -- (65,-50) -- (170,15) -- (-75,50) -- cycle;
+    \sk[bold]{(-170,-15) -- (65,-50) -- (170,15) -- (-75,50) -- cycle}
+    \draw[line width=0.8pt, draw=Ink, dash pattern=on 4pt off 3pt] (0,0) ellipse [x radius=70, y radius=20];
+    \draw[dotted sketch] (-72,-84) -- (-72,0);
+    \draw[dotted sketch] (72,-84) -- (72,0);
+    \Disc{(0,-85)}{72}{22}
+    \node[label] at (-95,-112) {#3};
+    \node[label] at (-185,-12) {#4};
+  \end{scope}%
+}

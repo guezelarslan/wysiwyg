@@ -1,0 +1,38 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{20}
+\renewcommand{\smallsize}{16}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{53}
+  % where DDD books start
+  \node[title] at (1975,20) {DDD books};
+  \skarrow{(1975,60)}{(1975,270)}
+  \node[note, anchor=west] at (2005,170) {start here};
+
+  % the three commitments
+  \skbox{(0,290)}{(420,420)}
+  \node[title] at (210,355) {need};
+  \skbox[Plane]{(800,290)}{(1300,420)}
+  \node[title] at (1050,355) {runtime};
+  \skbox[Plane]{(1700,290)}{(2250,420)}
+  \node[title] at (1975,355) {domain model};
+
+  \skarrow{(440,355)}{(780,355)}
+  \node[note] at (610,315) {NFRs};
+  \skarrow{(1320,355)}{(1680,355)}
+  \node[note] at (1500,315) {FRs};
+
+  % concrete examples
+  \node[note] at (1050,470) {browser / web server};
+  \node[note] at (1975,470) {web app};
+
+  % what each one is, in the model--context--reality picture
+  \skarrow{(210,440)}{(210,640)}
+  \skarrow{(1050,505)}{(1050,640)}
+  \skarrow{(1975,505)}{(1975,640)}
+  \node[title] at (210,690)  {reality / HW};
+  \node[title] at (1050,690) {context / framework};
+  \node[title] at (1975,690) {model};
+\end{tikzpicture}
+\end{document}

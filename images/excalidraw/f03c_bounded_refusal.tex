@@ -1,0 +1,34 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{21}
+\renewcommand{\skbendA}{2}
+\renewcommand{\skbendB}{3.5}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{41}
+  % outer world: neighbouring truths
+  \draw[dashed box, rounded corners=12pt] (0,0) rectangle (2440,660);
+  \node[note, anchor=west] at (55,55) {the wider domain (many true meanings)};
+
+  % the drawn boundary
+  \skbox[Plane]{(120,130)}{(1120,575)}
+  \node[title] at (620,205) {Bounded Context};
+  \sk[thin]{(380,242) -- (860,238)}
+  \node[note, anchor=north] at (620,285) {words, rules, and invariants\\mean one thing here};
+  \node[title] at (620,495) {Dui: authoritative inside};
+
+  % outside: neighbouring context / truths refused authority
+  \draw[dashed box, rounded corners=8pt] (1560,130) rectangle (2330,575);
+  \node[title] at (1945,205) {Elsewhere};
+  \sk[thin]{(1790,242) -- (2100,238)}
+  \node[note, anchor=north] at (1945,280) {also true —\\simply refused\\authority inside};
+  \node[note]  at (1945,495) {(same word, other rules)};
+
+  % Tong across the border
+  \node[note] at (1340,255) {Tong:\\translate,\\don't merge};
+  \skarrow{(1145,385)}{(1535,385)}
+  \skarrow{(1535,455)}{(1145,455)}
+\end{tikzpicture}
+\end{document}

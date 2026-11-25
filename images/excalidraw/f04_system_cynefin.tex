@@ -1,0 +1,61 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{20}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{47}
+  % the system: one boundary, several bounded contexts
+  \draw[dashed box, rounded corners=8pt] (0,0) rectangle (2400,900);
+  \node[title, anchor=west] at (50,55) {system};
+
+  % --- complex: a network -------------------------------------------------
+  \skbox{(120,130)}{(820,830)}
+  \node[title] at (470,200) {complex};
+  \begin{scope}[shift={(470,500)}]
+    \coordinate (a) at (-210,-130); \coordinate (b) at (-60,-180);
+    \coordinate (c) at (130,-110);  \coordinate (d) at (230,20);
+    \coordinate (e) at (90,110);    \coordinate (f) at (-110,70);
+    \coordinate (g) at (10,-10);    \coordinate (h) at (190,190);
+    \coordinate (i) at (-220,170);  \coordinate (j) at (-20,200);
+    \foreach \u/\v in {a/b, b/c, c/d, d/e, e/f, f/a, b/g, g/d, g/f, a/g,
+                       c/e, e/h, f/i, i/j, j/h, j/e}
+      \draw[thin] (\u) -- (\v);
+    \foreach \p in {a,b,c,d,e,f,g,h,i,j} {
+      \fill[white] (\p) circle [radius=20];
+      \skellipse[line width=1.1pt]{(\p)}{20}{20}
+    }
+  \end{scope}
+  \node[note] at (470,785) {volume: “I will learn.”};
+
+  % --- complicated: a structured surface ----------------------------------
+  \skbox{(850,130)}{(1550,830)}
+  \node[title] at (1200,200) {complicated};
+  \begin{scope}[shift={(1200,500)}]
+    \foreach \x in {-200,0,200} \foreach \y in {-110,90} {
+      \skbox[Plane]{(\x-70,\y-40)}{(\x+70,\y+40)}
+    }
+    \foreach \y in {-110,90} {
+      \sk[thin]{(-130,\y) -- (-70,\y)}
+      \sk[thin]{(70,\y) -- (130,\y)}
+    }
+    \sk[thin]{(-200,-70) -- (-200,50)}
+    \sk[thin]{(0,-70) -- (0,50)}
+    \sk[thin]{(200,-70) -- (200,50)}
+  \end{scope}
+  \node[note] at (1200,785) {surface: “I will explain.”};
+
+  % --- clear: a line -------------------------------------------------------
+  \skbox{(1580,130)}{(2280,830)}
+  \node[title] at (1930,200) {clear};
+  \begin{scope}[shift={(1930,500)}]
+    \foreach \x in {-240,-80,80,240} {
+      \fill[white] (\x,0) circle [radius=24];
+      \skellipse[line width=1.1pt]{(\x,0)}{24}{24}
+    }
+    \skarrow{(-212,0)}{(-108,0)}
+    \skarrow{(-52,0)}{(52,0)}
+    \skarrow{(108,0)}{(212,0)}
+  \end{scope}
+  \node[note] at (1930,785) {line: “I will repeat.”};
+\end{tikzpicture}
+\end{document}

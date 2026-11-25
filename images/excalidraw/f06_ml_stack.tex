@@ -1,0 +1,14 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{61}
+  \Stack{0}{0}{model}{runtime}{reality}
+  \node[noteR] at (1010,40)  {Python model\\(train, eval, …)};
+  \node[noteR] at (1010,180) {C++ TensorFlow, PyTorch\\(backpropagation, graphs, …)};
+  \node[noteR] at (1010,330) {CPU, GPU, memory};
+  \sk[thin]{(620,100) -- (995,45)}
+  \sk[thin]{(715,205) -- (995,185)}
+  \sk[thin]{(965,328) -- (995,330)}
+\end{tikzpicture}
+\end{document}

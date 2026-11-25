@@ -1,0 +1,27 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{20}
+\renewcommand{\titlesize}{24}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{31}
+  % column headings
+  \node[title] at (560,-60)  {reality};
+  \node[title] at (1960,-60) {language};
+  \node[title] at (3260,-60) {implementation};
+  \sk[thin]{(420,-25) -- (700,-30)}
+  \sk[thin]{(1810,-25) -- (2110,-30)}
+  \sk[thin]{(3060,-25) -- (3460,-30)}
+  % the three stacks
+  \Stack{0}{0}{model}{context}{reality}
+  \Stack{1400}{0}{model}{context}{human reality}
+  \StackR{2700}{0}{code / mathematics}{framework}{physical machine}
+  % language is carried by the implementation, row by row
+  \skarrow{(2050,100)}{(3140,100)}
+  \skarrow{(2145,200)}{(3045,182)}
+  \skarrow{(2390,330)}{(2850,288)}
+  % model kinds
+  \node[title] at (1960,490) {semantic model};
+  \node[title] at (3260,490) {executional model};
+\end{tikzpicture}
+\end{document}

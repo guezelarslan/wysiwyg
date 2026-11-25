@@ -1,0 +1,51 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{21}
+\renewcommand{\skbendA}{2}
+\renewcommand{\skbendB}{3.5}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{11}
+  % five movement boxes across
+  \skbox{(0,0)}{(420,130)}
+  \node[title] at (210,65) {Silence};
+  \node[note]  at (210,180) {felt friction};
+
+  \skbox[Plane]{(540,0)}{(980,130)}
+  \node[title] at (760,65) {Sentence};
+  \node[note]  at (760,180) {testable need};
+
+  \skbox[Plane]{(1100,0)}{(1520,130)}
+  \node[title] at (1310,65) {Frame};
+  \node[note]  at (1310,180) {boundary};
+
+  \skbox[Shade]{(1640,0)}{(2100,130)}
+  \node[title] at (1870,65) {Grammar};
+  \node[note]  at (1870,180) {promise + code};
+
+  \skbox[Shade]{(2220,0)}{(2640,130)}
+  \node[title] at (2430,65) {Chorus};
+  \node[note]  at (2430,180) {team + time};
+
+  % forward arrows
+  \skarrow{(435,65)}{(525,65)}
+  \skarrow{(995,65)}{(1085,65)}
+  \skarrow{(1535,65)}{(1625,65)}
+  \skarrow{(2115,65)}{(2205,65)}
+
+  % the return loop back to silence
+  \draw[line width=1.15pt, draw=Ink, line cap=round, dash pattern=on 6pt off 4pt,
+        -{Straight Barb[length=7pt, width=9pt, line width=1.15pt]}]
+    (2430,225) .. controls (2430,395) and (210,395) .. (210,225);
+  \draw[line width=0.8pt, draw=Ink, opacity=0.6, line cap=round, dash pattern=on 6pt off 4pt]
+    (2430,225) .. controls (2420,407) and (220,407) .. (210,225);
+  \node[note, fill=white, inner sep=4pt] at (1320,352)
+    {leaks, failed tests, new friction: the loop keeps the model alive};
+
+  % subtle return taps from Frame and Grammar
+  \draw[thin, dash pattern=on 4pt off 4pt] (1310,218) -- (1310,315);
+  \draw[thin, dash pattern=on 4pt off 4pt] (1870,218) -- (1870,315);
+\end{tikzpicture}
+\end{document}

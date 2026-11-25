@@ -1,0 +1,47 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{17}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{20}
+\renewcommand{\skbendA}{0.8}
+\renewcommand{\skbendB}{1.5}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{59}
+  % axes
+  \skarrow{(160,720)}{(160,40)}
+  \skarrow{(160,720)}{(2200,720)}
+  \node[title, anchor=east] at (125,85) {error};
+  \node[title, anchor=north] at (1180,765) {model capacity / internal variety};
+
+  % valley marker (requisite variety)
+  \draw[dashed box] (1160,170) -- (1160,720);
+  \node[title] at (1160,75) {requisite variety};
+  \node[note]  at (1160,132) {(matched complexity)};
+
+  % training error curve (smoothly decreasing)
+  \draw[line width=1.15pt, draw=Hidden, dash pattern=on 6pt off 4pt, line cap=round]
+    (240,190) .. controls (620,440) and (1160,570) .. (2080,625);
+  \node[note, anchor=west, text=Hidden] at (1660,672) {training error};
+
+  % new-data error curve (U-shape with valley at x=1160)
+  \draw[line width=1.35pt, draw=Ink, line cap=round]
+    (240,150) .. controls (580,380) and (880,420) .. (1160,420)
+              .. controls (1460,420) and (1760,320) .. (2080,145);
+  \draw[line width=0.9pt, draw=Ink, opacity=0.7, line cap=round]
+    (240,154) .. controls (585,385) and (885,415) .. (1160,423)
+              .. controls (1465,423) and (1755,325) .. (2080,149);
+  \node[note, anchor=east] at (2080,105) {error on new data};
+
+  % dot at the sweet spot
+  \fill[white] (1160,420) circle [radius=16];
+  \skellipse[line width=1.2pt]{(1160,420)}{16}{16}
+
+  % underfit / overfit labels
+  \node[title, anchor=south] at (580,555) {underfit};
+  \node[note,  anchor=north] at (580,575) {too little variety;\\misses real patterns};
+
+  \node[title, anchor=south] at (1740,415) {overfit};
+  \node[note,  anchor=north] at (1740,435) {too much variety;\\memorises noise};
+\end{tikzpicture}
+\end{document}

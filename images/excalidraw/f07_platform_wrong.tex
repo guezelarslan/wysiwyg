@@ -1,0 +1,19 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{20}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{71}
+  \node[title] at (350,-60) {wrong};
+  \skbox{(0,0)}{(700,150)}
+  \node[title] at (350,75) {core domain};
+  \skbox[Plane]{(0,170)}{(700,320)}
+  \node[title] at (350,245) {supporting domain};
+  \skbox[Shade]{(0,340)}{(700,490)}
+  \node[title] at (350,415) {generic domain};
+  % importance read as altitude
+  \skarrow{(790,470)}{(790,20)}
+  \node[note, anchor=west] at (830,215) {importance\\as altitude?};
+  \sk[thin]{(270,-25) -- (430,-30)}
+\end{tikzpicture}
+\end{document}

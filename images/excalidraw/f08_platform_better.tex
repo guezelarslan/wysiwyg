@@ -1,0 +1,18 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{20}
+\renewcommand{\titlesize}{24}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{83}
+  \node[title] at (560,-60)  {core};
+  \node[title] at (1710,-60) {supporting};
+  \node[title] at (2860,-60) {generic};
+  \sk[thin]{(470,-25) -- (650,-30)}
+  \sk[thin]{(1580,-25) -- (1840,-30)}
+  \sk[thin]{(2750,-25) -- (2970,-30)}
+  \Stack{0}{0}{domain model}{runtime}{machine}
+  \Stack{1150}{0}{domain model}{runtime}{machine}
+  \Stack{2300}{0}{domain model}{runtime}{machine}
+\end{tikzpicture}
+\end{document}

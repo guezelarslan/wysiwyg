@@ -1,0 +1,57 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{17}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{20}
+\renewcommand{\skbendA}{2}
+\renewcommand{\skbendB}{3.5}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{103}
+  % append-only history label
+  \node[title, anchor=west] at (20,20) {Tong: append-only history (what happened)};
+
+  % four events along time
+  \skbox[Plane]{(20,85)}{(500,190)}
+  \node[note] at (260,138) {OrderPlaced};
+
+  \skbox[Plane]{(620,85)}{(1160,190)}
+  \node[note] at (890,138) {PaymentCaptured};
+
+  \skbox[Plane]{(1280,85)}{(1860,190)}
+  \node[note] at (1570,138) {ShipmentDispatched};
+
+  \skbox[Plane]{(1980,85)}{(2460,190)}
+  \node[note] at (2220,138) {RefundIssued};
+
+  \skarrow{(515,138)}{(605,138)}
+  \skarrow{(1175,138)}{(1265,138)}
+  \skarrow{(1875,138)}{(1965,138)}
+
+  % horizontal collector line
+  \draw[dashed box] (120,265) -- (2360,265);
+  \node[note, fill=white, inner sep=4pt] at (1240,265) {same facts, rebuildable whenever a policy changes};
+
+  % three branches down to projections
+  \skarrow{(440,275)}{(440,400)}
+  \skarrow{(1240,295)}{(1240,400)}
+  \skarrow{(2040,275)}{(2040,400)}
+
+  \skbox{(100,415)}{(780,660)}
+  \node[title] at (440,470) {Finance};
+  \sk[thin]{(320,502) -- (560,499)}
+  \node[note, anchor=north] at (440,530) {revenue, refunds,\\tax, liability};
+
+  \skbox{(900,415)}{(1580,660)}
+  \node[title] at (1240,470) {Logistics};
+  \sk[thin]{(1110,502) -- (1370,499)}
+  \node[note, anchor=north] at (1240,530) {pick, pack,\\move, recover};
+
+  \skbox{(1700,415)}{(2380,660)}
+  \node[title] at (2040,470) {Support};
+  \sk[thin]{(1920,502) -- (2160,499)}
+  \node[note, anchor=north] at (2040,530) {promises made\\and kept};
+
+  \node[title] at (1240,735) {Dui: purpose-specific projections (how each context reads it)};
+\end{tikzpicture}
+\end{document}

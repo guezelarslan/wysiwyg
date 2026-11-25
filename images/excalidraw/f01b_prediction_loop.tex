@@ -1,0 +1,42 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{20}
+\renewcommand{\skbendA}{5}
+\renewcommand{\skbendB}{7}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{19}
+  % four nodes of the prediction loop
+  \skbox[Plane]{(680,0)}{(1300,145)}
+  \node[title] at (990,50) {Expect};
+  \node[note]  at (990,108) {(current model)};
+
+  \skbox{(1440,235)}{(2140,380)}
+  \node[title] at (1790,285) {Observe};
+  \node[note]  at (1790,343) {(what actually happens)};
+
+  \skbox[Shade]{(680,470)}{(1300,615)}
+  \node[title] at (990,520) {Friction};
+  \node[note]  at (990,578) {(prediction error)};
+
+  \skbox[Plane]{(0,235)}{(620,380)}
+  \node[title] at (310,285) {Update};
+  \node[note]  at (310,343) {(word, cut, or belief)};
+
+  % cycle arrows
+  \skarrow{(1320,75)}{(1740,220)}
+  \skarrow{(1740,395)}{(1320,540)}
+  \skarrow{(660,540)}{(320,395)}
+  \skarrow{(320,220)}{(660,75)}
+
+  \node[note] at (1020,308) {stay in Silence\\long enough to listen};
+
+  % the premature-noun trap branching off Friction
+  \skarrow[dash pattern=on 5pt off 4pt]{(1320,575)}{(1620,665)}
+  \draw[dashed box, rounded corners=6pt] (1640,560) rectangle (2520,805);
+  \node[title] at (2080,612) {Premature noun};
+  \node[note, anchor=north] at (2080,654) {suppress it, or slap a table on it\\(listening ends)};
+\end{tikzpicture}
+\end{document}

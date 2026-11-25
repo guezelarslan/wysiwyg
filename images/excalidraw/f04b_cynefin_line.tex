@@ -1,0 +1,47 @@
+\documentclass[tikz,border=8pt]{standalone}
+\input{sketch}
+\renewcommand{\labelsize}{18}
+\renewcommand{\smallsize}{15}
+\renewcommand{\titlesize}{20}
+\renewcommand{\skbendA}{1}
+\renewcommand{\skbendB}{1.8}
+\begin{document}
+\begin{tikzpicture}
+  \pgfmathsetseed{49}
+  % certainty arrow on top
+  \skarrow{(40,35)}{(2540,35)}
+  \node[note, fill=white, inner sep=4pt] at (1290,35) {growing certainty};
+
+  % four Cynefin stations along the line
+  \skbox{(40,105)}{(600,445)}
+  \node[title] at (320,165) {Chaos};
+  \sk[thin]{(210,198) -- (430,195)}
+  \node[note, anchor=north] at (320,230) {act, sense,\\respond};
+  \node[note]  at (320,390) {(stabilise first)};
+
+  \skbox[Plane]{(680,105)}{(1250,445)}
+  \node[title] at (965,165) {Complex};
+  \sk[thin]{(835,198) -- (1095,195)}
+  \node[note, anchor=north] at (965,230) {probe, sense,\\respond};
+  \node[note]  at (965,390) {(hindsight only)};
+
+  \skbox[Plane]{(1330,105)}{(1900,445)}
+  \node[title] at (1615,165) {Complicated};
+  \sk[thin]{(1450,198) -- (1780,195)}
+  \node[note, anchor=north] at (1615,230) {sense, analyse,\\respond};
+  \node[note]  at (1615,390) {(expert analysis)};
+
+  \skbox[Shade]{(1980,105)}{(2540,445)}
+  \node[title] at (2260,165) {Clear};
+  \sk[thin]{(2160,198) -- (2360,195)}
+  \node[note, anchor=north] at (2260,230) {sense, categorise,\\respond};
+  \node[note]  at (2260,390) {(established recipe)};
+
+  % opposing pulls: Tong strongest on the left, Dui strongest on the right
+  \skarrow{(1240,540)}{(60,540)}
+  \node[title, anchor=west] at (80,605) {Tong (flow, listening)};
+
+  \skarrow{(1340,540)}{(2520,540)}
+  \node[title, anchor=east] at (2500,605) {Dui (cut, judgement)};
+\end{tikzpicture}
+\end{document}
