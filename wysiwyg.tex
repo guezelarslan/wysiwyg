@@ -1,0 +1,1250 @@
+%% =============================================================================
+%% WYSIWYG -- What You Say Is What You Get
+%% Design: monochrome technical layout (transferred from wysisyg_edited.tex).
+%% Build with XeLaTeX (twice):  xelatex wysiwyg.tex
+%% =============================================================================
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[
+  a4paper,
+  top=25mm,
+  bottom=23mm,
+  left=23mm,
+  right=23mm,
+  headheight=14pt,
+  headsep=8mm,
+  footskip=11mm
+]{geometry}
+
+\usepackage{amsmath}
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{IBM Plex Serif}
+\setsansfont{IBM Plex Sans}
+\setmonofont{IBM Plex Mono}[Scale=0.87]
+\usepackage{unicode-math}
+\setmathfont{IBM Plex Math}
+
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{lastpage}
+\usepackage{booktabs,array,tabularx}
+\usepackage[table]{xcolor}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage[skins,breakable]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage[
+  hidelinks,
+  pdftitle={WYSIWYG --- What You Say Is What You Get},
+  pdfauthor={Baris Güzelarslan},
+  pdfsubject={Domain-Driven Design field guide for software developers},
+  bookmarksopen=true
+]{hyperref}
+\usepackage{bookmark}
+\usepackage{xcolor}
+\usepackage{tikz}
+% \thickstrike[<Farbe>]{Text}
+\newcommand{\thickstrike}[2][red]{%
+  \tikz[baseline=(T.base)]{%
+    \node[inner sep=0pt,outer sep=0pt,anchor=base] (T) {#2};%
+    % exakt mittig zwischen oben (north) und unten (south)
+    \path (T.south) -- (T.north) coordinate[pos=.5] (M);
+    \draw[#1,line width=2pt,line cap=round]
+      (T.west |- M) -- (T.east |- M);
+  }%
+}
+
+% -----------------------------------------------------------------------------
+% Monochrome palette: black, white, and greys only
+% -----------------------------------------------------------------------------
+\definecolor{Ink}{gray}{0.07}
+\definecolor{G1}{gray}{0.22}
+\definecolor{G2}{gray}{0.38}
+\definecolor{G3}{gray}{0.58}
+\definecolor{G4}{gray}{0.78}
+\definecolor{G5}{gray}{0.89}
+\definecolor{G6}{gray}{0.955}
+
+\color{Ink}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em plus 0.1em minus 0.05em}
+\linespread{1.07}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\setlength{\emergencystretch}{3em}
+
+\setlist[itemize]{leftmargin=5.2mm,itemsep=2.4pt,topsep=3pt,parsep=0pt,label={\raisebox{0.2ex}{\rule{1.5mm}{1.5mm}}}}
+\setlist[enumerate]{leftmargin=6.6mm,itemsep=3pt,topsep=3pt,parsep=0pt,
+  label=\ttfamily\bfseries\small\arabic*.}
+
+% -----------------------------------------------------------------------------
+% Running header and footer
+% -----------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\ttfamily\scriptsize\bfseries WYSIWYG\ \textcolor{G3}{//}\ \mdseries What You \sout{See} Say Is What You Get}
+\fancyhead[R]{\ttfamily\scriptsize\nouppercase{\rightmark}}
+\fancyfoot[L]{\ttfamily\scriptsize\textcolor{G2}{SILENCE / SENTENCE / FRAME / GRAMMAR / CHORUS}}
+\fancyfoot[R]{\ttfamily\scriptsize\textcolor{G2}{\thepage\,/\,\pageref*{LastPage}}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[L]{\ttfamily\scriptsize\textcolor{G2}{SILENCE / SENTENCE / FRAME / GRAMMAR / CHORUS}}
+  \fancyfoot[R]{\ttfamily\scriptsize\textcolor{G2}{\thepage\,/\,\pageref*{LastPage}}}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% -----------------------------------------------------------------------------
+% Counters
+% -----------------------------------------------------------------------------
+\newcounter{movement}
+\newcounter{topic}
+\newcounter{fig}
+\newcounter{sub}[movement]
+\renewcommand{\thefig}{\arabic{fig}}
+\renewcommand{\thesub}{\arabic{movement}.\arabic{sub}}
+
+% -----------------------------------------------------------------------------
+% Inline helpers
+% -----------------------------------------------------------------------------
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\QuoteAttrib}[1]{\par\vspace{2mm}{\ttfamily\scriptsize\bfseries\textcolor{G2}{--- #1}}}
+
+% -----------------------------------------------------------------------------
+% Boxes
+%   pullquote : somebody else's words        (grey fill, heavy left bar)
+%   claim     : one sentence to remember     (black fill, white text)
+%   devnote   : the take-away                (black outline, black label tab)
+%   aside     : caveat or side remark        (dashed outline)
+%   codebox   : code and schematic snippets
+%   codebox   : code and schematic snippets
+% -----------------------------------------------------------------------------
+\newtcolorbox{pullquote}{
+  enhanced,
+  colback=G6,
+  colframe=G6,
+  boxrule=0pt,
+  borderline west={3pt}{0pt}{Ink},
+  sharp corners,
+  left=6mm,
+  right=5mm,
+  top=3.6mm,
+  bottom=3.6mm,
+  before skip=10pt,
+  after skip=10pt,
+  fontupper=\itshape
+}
+
+\newtcolorbox{claim}{
+  enhanced,
+  colback=Ink,
+  colframe=Ink,
+  boxrule=0pt,
+  sharp corners,
+  left=5.5mm,
+  right=5.5mm,
+  top=3.6mm,
+  bottom=3.6mm,
+  before skip=10pt,
+  after skip=10pt,
+  fontupper=\sffamily\color{white}
+}
+
+\newtcolorbox{devnote}{
+  enhanced,
+  breakable,
+  colback=white,
+  colframe=Ink,
+  boxrule=1pt,
+  sharp corners,
+  left=5mm,
+  right=5mm,
+  top=5mm,
+  bottom=3.4mm,
+  before skip=12pt,
+  after skip=6pt,
+  title={DEVNOTE},
+  fonttitle=\ttfamily\bfseries\scriptsize,
+  coltitle=white,
+  colbacktitle=Ink,
+  attach boxed title to top left={xshift=5mm,yshift=-2.6mm},
+  boxed title style={
+    sharp corners,
+    boxrule=0pt,
+    colback=Ink,
+    left=2.4mm,right=2.4mm,top=0.7mm,bottom=0.7mm
+  }
+}
+
+\newtcolorbox{aside}[1][ASIDE]{
+  enhanced,
+  breakable,
+  colback=white,
+  colframe=G3,
+  boxrule=0.7pt,
+  frame style={dashed},
+  sharp corners,
+  left=4.5mm,
+  right=4.5mm,
+  top=4.6mm,
+  bottom=3mm,
+  before skip=10pt,
+  after skip=8pt,
+  title={#1},
+  fonttitle=\ttfamily\bfseries\scriptsize,
+  coltitle=Ink,
+  colbacktitle=white,
+  attach boxed title to top left={xshift=5mm,yshift=-2.4mm},
+  boxed title style={sharp corners,boxrule=0pt,colback=white,left=1.6mm,right=1.6mm,top=0.5mm,bottom=0.5mm}
+}
+
+\newtcolorbox{codebox}{
+  enhanced,
+  colback=G6,
+  colframe=G6,
+  boxrule=0pt,
+  borderline west={2.5pt}{0pt}{G2},
+  sharp corners,
+  left=4.5mm,
+  right=3mm,
+  top=2.6mm,
+  bottom=2.6mm,
+  before skip=9pt,
+  after skip=9pt
+}
+
+\newtcolorbox{manifesto}[1]{
+  enhanced,
+  breakable,
+  colback=white,
+  colframe=G3,
+  boxrule=0.7pt,
+  sharp corners,
+  left=5mm,
+  right=5mm,
+  top=5mm,
+  bottom=3mm,
+  before skip=10pt,
+  after skip=9pt,
+  title={#1},
+  fonttitle=\ttfamily\bfseries\scriptsize,
+  coltitle=white,
+  colbacktitle=G1,
+  attach boxed title to top left={xshift=5mm,yshift=-2.6mm},
+  boxed title style={sharp corners,boxrule=0pt,colback=G1,left=2.4mm,right=2.4mm,top=0.7mm,bottom=0.7mm}
+}
+
+\newtcolorbox{stance}[3]{
+  enhanced,
+  breakable,
+  colback=white,
+  colframe=#2,
+  boxrule=0.9pt,
+  sharp corners,
+  left=5mm,
+  right=5mm,
+  top=5.2mm,
+  bottom=3mm,
+  before skip=9pt,
+  after skip=7pt,
+  title={#1},
+  fonttitle=\sffamily\bfseries\small,
+  coltitle=white,
+  colbacktitle=#2,
+  attach boxed title to top left={xshift=5mm,yshift=-2.9mm},
+  boxed title style={sharp corners,boxrule=0pt,colback=#2,left=2.4mm,right=2.4mm,top=0.8mm,bottom=0.8mm},
+}
+
+\newtcolorbox{lens}[1]{
+  enhanced,
+  colback=white,
+  colframe=G4,
+  boxrule=0.7pt,
+  borderline west={3pt}{0pt}{Ink},
+  sharp corners,
+  left=5.5mm,
+  right=5mm,
+  top=5mm,
+  bottom=3mm,
+  before skip=8pt,
+  after skip=8pt,
+  title={#1},
+  fonttitle=\sffamily\bfseries\small,
+  coltitle=Ink,
+  colbacktitle=white,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={sharp corners,boxrule=0pt,colback=white,left=1.6mm,right=1.6mm}
+}
+
+% -----------------------------------------------------------------------------
+% Structural commands
+% -----------------------------------------------------------------------------
+% Context / language check: one question that closes a section
+\newtcolorbox{checkbox}[1]{
+  enhanced,
+  colback=white,
+  colframe=white,
+  boxrule=0pt,
+  borderline west={1.4pt}{0pt}{G2},
+  sharp corners,
+  left=4mm,
+  right=3mm,
+  top=1.6mm,
+  bottom=1.6mm,
+  before skip=7pt,
+  after skip=9pt,
+  fontupper=\small,
+  before upper={{\ttfamily\bfseries\scriptsize\textcolor{G2}{#1}}\enspace}
+}
+\newcommand{\Checkpoint}[2]{\begin{checkbox}{#1}#2\end{checkbox}}
+
+\newcommand{\SubHead}[1]{%
+  \par\Needspace{5\baselineskip}\stepcounter{sub}\vspace{2mm}%
+  {\ttfamily\bfseries\footnotesize\textcolor{G2}{\thesub}\enspace\sffamily\bfseries\normalsize #1\par}%
+  \vspace{0.6mm}%
+}
+
+% \Figure{file in images/excalidraw}{width}{caption}
+\newcommand{\Figure}[3]{%
+  \par\Needspace{14\baselineskip}\refstepcounter{fig}\vspace{2mm}%
+  \begin{center}
+    \includegraphics[width=#2]{images/excalidraw/#1}\par\vspace{2.4mm}
+    \parbox{0.88\linewidth}{\centering\small
+      {\ttfamily\bfseries\scriptsize\textcolor{G2}{FIGURE \thefig}}\enspace{\sffamily #3}}
+  \end{center}\label{fig:#1}\vspace{1mm}%
+}
+
+% \SectionTitle{label}{title}
+\newcommand{\SectionTitle}[2]{%
+  {\ttfamily\bfseries\footnotesize\textcolor{G2}{#1}\par}\vspace{1.4mm}%
+  {\sffamily\bfseries\fontsize{22}{26}\selectfont #2\par}\vspace{2mm}%
+  {\color{Ink}\rule{\linewidth}{1pt}\par}\vspace{4mm}%
+}
+
+% \MovementOpen{number}{name}{tagline}{context counterpart}
+% Opens one of the five language movements; the next \Topic shares its page.
+\newif\ifMovementOpen
+\newcommand{\MovementOpen}[4]{%
+  \clearpage
+  \stepcounter{movement}%
+  \gdef\MovementName{#2}%
+  \global\MovementOpentrue
+  \phantomsection
+  \addcontentsline{toc}{part}{Movement #1: #2}%
+  \markright{Movement #1 // #2}%
+  \noindent\colorbox{Ink}{\parbox{\dimexpr\linewidth-2\fboxsep}{\color{white}
+    \vspace{4mm}
+    {\ttfamily\bfseries\scriptsize\color{G4}\ MOVEMENT 0#1 OF 05 // LANGUAGE\par}
+    \vspace{2.4mm}
+    {\sffamily\bfseries\fontsize{30}{34}\selectfont\ #2\par}
+    \vspace{1.6mm}
+    {\sffamily\fontsize{11}{15}\selectfont\color{G5}\ #3\par}
+    \vspace{4mm}
+  }}\par
+  \vspace{1.6mm}
+  {\ttfamily\scriptsize\bfseries\textcolor{G2}{CONTEXT IT DRAWS}}\enspace{\small\sffamily #4}\par
+  \vspace{7mm}%
+}
+
+% \Topic[short running title]{title}: a section inside a movement.
+\newcommand{\Topic}[2][]{%
+  \ifMovementOpen\global\MovementOpenfalse\else\clearpage\fi
+  \stepcounter{topic}%
+  \phantomsection
+  \addcontentsline{toc}{section}{#2}%
+  \if\relax\detokenize{#1}\relax\markright{#2}\else\markright{#1}\fi
+  {\ttfamily\bfseries\footnotesize\textcolor{G2}{MOVEMENT 0\arabic{movement} // \MakeUppercase{\MovementName}}\par}\vspace{1.4mm}%
+  {\sffamily\bfseries\fontsize{19}{23}\selectfont\raggedright #2\par}%
+  \vspace{2.4mm}{\color{Ink}\rule{\linewidth}{1pt}\par}\vspace{2mm}%
+}
+
+\newcommand{\Pair}[3]{%
+  \par\noindent
+  \begin{tabular}{@{}p{0.40\linewidth}@{\hspace{2mm}}p{0.18\linewidth}@{\hspace{2mm}}p{0.34\linewidth}@{}}
+    \sffamily\bfseries #1 & \ttfamily\scriptsize\textcolor{G2}{#2} & \sffamily #3
+  \end{tabular}\par
+  \vspace{1.4mm}%
+}
+
+% -----------------------------------------------------------------------------
+% Stance markers (line / surface / volume), monochrome text markers
+% -----------------------------------------------------------------------------
+\newcommand{\IconLine}{\textsf{\bfseries\scriptsize LINE}}
+\newcommand{\IconSurface}{\textsf{\bfseries\scriptsize SURFACE}}
+\newcommand{\IconVolume}{\textsf{\bfseries\scriptsize VOLUME}}
+
+\begin{document}
+\pagenumbering{gobble}
+
+% =============================================================================
+% COVER
+% =============================================================================
+\begin{titlepage}
+  \thispagestyle{empty}
+  \noindent\colorbox{Ink}{\parbox{\dimexpr\linewidth-2\fboxsep}{\color{white}
+    \vspace{8mm}
+    {\ttfamily\bfseries\footnotesize\color{G4} FIELD GUIDE // DOMAIN-DRIVEN DESIGN\par}
+    \vspace{6mm}
+    {\sffamily\bfseries\fontsize{58}{62}\selectfont WYSIWYG\par}
+    \vspace{4mm}
+    {\sffamily\fontsize{19}{25}\selectfont What You \thickstrike{See} Say Is What You Get\par}
+    \vspace{5mm}
+    {\sffamily\fontsize{11}{16}\selectfont\color{G4} Developers are not primarily typing instructions. We are specifying a world in language, and code is the moment that specification becomes executable.\par}
+    \vspace{8mm}
+  }}
+
+  \vspace{12mm}
+  {\renewcommand{\arraystretch}{1.5}\arrayrulecolor{G4}%
+  \begin{tabularx}{100mm}{@{}>{\ttfamily\scriptsize\bfseries}p{26mm}X@{}}
+    \hline AUTHOR & Baris Güzelarslan \\
+    \hline DOCUMENT & Technical-philosophical reference \\
+    \hline AUDIENCE & Software developers and architects \\
+    \hline SCOPE & Domain-Driven Design, language, models, runtimes, teams \\
+    \hline STRUCTURE & Five movements of language, seven sections, sixteen sketches \\
+    \hline
+  \end{tabularx}}
+
+  \vspace{14mm}
+  \noindent\colorbox{G5}{\parbox{70mm}{\ttfamily\bfseries\scriptsize\ 01 SILENCE}}\par
+  \noindent\colorbox{G4}{\parbox{70mm}{\ttfamily\bfseries\scriptsize\ 02 SENTENCE}}\par
+  \noindent\colorbox{G3}{\parbox{70mm}{\color{white}\ttfamily\bfseries\scriptsize\ 03 FRAME}}\par
+  \noindent\colorbox{G1}{\parbox{70mm}{\color{white}\ttfamily\bfseries\scriptsize\ 04 GRAMMAR}}\par
+  \noindent\colorbox{Ink}{\parbox{70mm}{\color{white}\ttfamily\bfseries\scriptsize\ 05 CHORUS}}\par
+
+  \vfill
+  {\ttfamily\scriptsize\textcolor{G2}{SILENCE // SENTENCE // FRAME // GRAMMAR // CHORUS}}
+\end{titlepage}
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\markright{Prologue}
+\phantomsection
+\addcontentsline{toc}{part}{Prologue: the claim}
+
+% =============================================================================
+% PROLOGUE
+% =============================================================================
+\SectionTitle{00 // PROLOGUE}{The claim}
+
+Human listeners are wonderfully forgiving.
+
+Say \emph{“the order shipped late”} in a hallway, and nobody blinks. Your colleague quietly fills in the blanks. Is the \emph{order} a checkout commitment, or a cardboard box on a pallet? Is \emph{late} measured against a promise to the customer, or against an internal schedule? Did it \emph{ship} when the label printed, or when the van left the gate? Nobody asks. Everyone picks the reading that makes you sound sensible, and the conversation rolls on.
+
+Conversation runs on charity. Compilers and runtimes have none to give.
+
+A meaning can stay fuzzy over coffee. It cannot stay fuzzy in production: it gets settled by an \code{if} branch, a default value, a nullable column, or an unhandled exception at 2\,a.m. If you do not choose the meaning deliberately, an accidental meaning still runs.
+
+That is why \textbf{developers are not primarily typing instructions. We are specifying a world.} Code is simply the moment that specification becomes executable. Typing is the last step of the work, not its substance.
+
+\begin{claim}
+\textbf{What you say is what you get.} The language you commit to draws the context it is valid in, and code is that language made literal. The hardest part of the job happens before anyone opens an editor.
+\end{claim}
+
+This guide takes its title literally. It follows a single piece of language through its whole life. The language starts as friction nobody can name. It becomes a sentence that could be wrong, then a boundary that decides which meanings rule, then a grammar that hardens into code. Finally it lands in the hands of a team that has to keep it alive.
+
+Along the way you will meet everything Domain-Driven Design calls \emph{context}—bounded contexts, runtimes, platforms, versions. Here they are not separate topics to memorise; they appear as something language \emph{does}: the cut it makes, the frame it draws, the promise it dares, and the people it needs.
+
+\SubHead{Five movements}
+
+The journey has five movements, and each one hands the next something it cannot make for itself.
+
+\begin{claim}
+Silence \(\rightarrow\) Sentence \(\rightarrow\) Frame \(\rightarrow\) Grammar \(\rightarrow\) Chorus
+
+\vspace{2mm}
+Friction becomes a sentence. The sentence receives a boundary. The bounded language receives an honest promise. The promise receives a team capable of keeping it.
+\end{claim}
+
+\Figure{f00_five_movements}{0.96\linewidth}{The five movements of language, and the loop that keeps a living model alive. Leaks, failed tests, and fresh surprises send the work back to Silence.}
+
+Here is the road in brief.
+
+\textbf{Silence.} People feel friction long before anyone can explain it.
+
+\textbf{Sentence.} Someone takes a risk and names the missing capability, together with the observation that would prove that name wrong.
+
+\textbf{Frame.} The sentence gets a boundary. Inside it, some meanings rule. Others may be perfectly true next door, yet get no say here.
+
+\textbf{Grammar.} Inside the frame, the language picks an honest level of certainty—repeat, explain, or learn—and hardens into code or mathematics, tests, and a runtime to carry them.
+
+\textbf{Chorus.} Then comes the awkward question. Can a real team, with its real conversations and handoffs, keep the promise the grammar just made?
+
+The road does not stop politely at Chorus. A failed confirmation in Grammar, a leaking boundary in Frame, or a chorus that can no longer hear a distinction sends the work straight back to Silence. The new friction turns up as an incident, a workaround, or last quarter's argument under a fresh ticket number.
+
+The loop is not a confession of failure. It is how a living model stays alive.
+
+Most teams, unfortunately, walk the road backwards. They start with a database noun. They copy bounded contexts out of a textbook. They let the framework decide what the domain is, apply one pattern to every flavour of uncertainty, sweep supporting domains into a “platform” bucket, and freeze whatever process happened to work for \code{version 0.1}.
+
+Textbooks and backlogs tend to join the journey at \textbf{Grammar}, with code and tickets, or at \textbf{Chorus}, with a reorganisation. That is two steps too late: an effect nobody can name yet cannot be bounded, tested, or safely built.
+
+At every step, language also draws a piece of context. The table pairs them up: on the left, what you say; on the right, what that saying draws.
+
+\begin{center}
+\small\renewcommand{\arraystretch}{1.4}\arrayrulecolor{G4}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}X@{}}
+\toprule
+\sffamily\textbf{Language (what you say)} & & \sffamily\textbf{Context (what it draws)} \\ \midrule
+\textbf{Silence}: friction is evidence, not yet a name. & $\leftrightarrow$ & Chaos: a context is cut out of the whole. \\ \midrule
+\textbf{Sentence:} a need that could be wrong. & $\leftrightarrow$ & The semantic model: specify the world before encoding it. \\ \midrule
+\textbf{Frame}: a bounded context is a disciplined refusal. & $\leftrightarrow$ & The boundary: drawn, not found. \\ \midrule
+\textbf{Grammar}: learn, explain, or repeat. & $\leftrightarrow$ & Cynefin and the runtime: the nature of the problem decides how we act, and something must carry the act. \\ \midrule
+\textbf{Chorus}: every domain model needs speakers. & $\leftrightarrow$ & Team design: stream-aligned teams and an explicit runtime. \\
+the ethics of the handoff. & $\leftrightarrow$ & Agile: a shift in timing. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\Needspace{12\baselineskip}
+\SubHead{Three lenses}
+
+Three lenses run through all five movements:
+
+\begin{lens}{Tong and Dui — Flow vs.\ Cut}
+Two words from Daoist philosophy name a tug-of-war every engineer has felt.\\
+
+\textbf{Tong} (flow, connection, passage) asks: \emph{What is moving here? How do things connect? What haven't we pinned down yet?}\\
+
+\textbf{Dui} (cut, distinction, judgment) asks: \emph{Is this X or Y? Does it pass or fail?}\\
+
+\textbf{Clear problems can jump straight to Dui. Complex ones must linger in Tong, because any early classification is still just a guess.}\\
+
+Dui also means \emph{correctness}: being right, accurate, exact. You need it, but it is not enough. A statement can be factually correct and still damage the situation. Tong, flowing through, keeps the living connection intact; without Dui it drifts into vague accommodation, and Dui without Tong hardens into defending a correct position that no longer serves.
+
+Inside a bounded context, the pair becomes very practical: \textbf{Dui is the consistency inside the boundary; Tong is its living connection to everything across it.}\\
+
+A mnemonic that only works if you squint at the spelling: in complex territory, spend more time in \textbf{Tong}(ue) than in \textbf{Dui}(ng). Talking, connecting, and naming come first; the doing that follows is only as good as the talking. The five movements stretch that pun into a method. Four of them belong to the tongue. Only the fourth, Grammar, lets the doing begin.
+\end{lens}
+
+\begin{lens}{Semantic model vs.\ Executional model}
+The \textbf{semantic model} is what the business domain means in human life, held in language. The \textbf{executional model} is how a machine carries that meaning.\\
+
+Collapsing the two is how an ORM entity, a queue message, or an AI-generated class starts pretending to be the domain.
+\end{lens}
+
+\begin{lens}{Model, context, reality}
+Three words, three jobs. A \textbf{model} says how we understand reality. A \textbf{context} says where that understanding holds. \textbf{Reality} is what both are about—and it is always bigger than the slice we cut out of it.\\
+
+Keep the three apart, and a surprising amount of design confusion simply evaporates.
+\end{lens}
+
+% =============================================================================
+% MOVEMENT 1 -- SILENCE
+% =============================================================================
+\MovementOpen{1}{Silence}{Friction is evidence, not yet a name.}{Chaos: a context is cut out of the whole.}
+
+\Topic{Start with silence}
+
+\begin{lens}{In this movement}
+This first movement runs on an idea from David Deutsch's \emph{The Beginning of Infinity}: knowledge grows through \textbf{conjecture}, fed by \textbf{curiosity} and kept honest by \textbf{criticism}.\\
+
+Before any of that can start, we have to admit that \textbf{we cannot see in chaos}. We must first cut out a workable slice, and remember what the cut leaves behind.\\
+
+What we find inside that slice is shaped by \textbf{culture}: by its unspoken needs, and by the creativity that grows out of living and working together. Culture is a \textbf{language} in the widest sense. It is not only what people say in conversation, but also how they think, what they expect, and what they never need to put into words.
+\end{lens}
+
+\SubHead{Conjectures and creativity}
+
+Nobody has ever seen gravity. We only see what it does. Things fall, and the force itself stays perfectly invisible.
+
+So we do the next best thing. We measure the effects, collect data, and extrapolate. The predictions can be superb. Yet all that data tells us \emph{what} happens and stays almost silent about \emph{why}.
+
+Machine learning runs into the same wall at industrial scale. Feed an algorithm enough data, and it will hand back sharp predictions—genuine knowledge of correlations. What it will not hand back is the cause underneath. A modern model can spot a pattern with uncanny accuracy and still have no idea why the pattern holds.
+
+Understanding goes one step further. It asks \emph{why?} and dares to propose a hidden mechanism. David Deutsch calls these informed guesses \textbf{conjectures} \cite{deutsch11}. A conjecture is not a wild guess. It is a creative, testable account of what we observe. It takes curiosity to come up with one, and criticism to make it better.
+
+\begin{pullquote}
+The real source of our theories is conjecture, and the real source of our knowledge is conjecture alternating with criticism. We create theories by rearranging, combining, altering and adding to existing ideas with the intention of improving upon them. The role of experiment and observation is to choose between existing theories, not to be the source of new ones.
+\QuoteAttrib{David Deutsch, The Beginning of Infinity \cite{deutsch11}}
+\end{pullquote}
+
+Science, in other words, is a self-correcting loop: conjecture, test, critique, refine.
+
+You propose how reality works beneath the surface, then you hold that account up against hard data. When the evidence favours a better explanation, the old one goes—even if it was your favourite. That willingness to be corrected is what separates understanding from a bigger pile of data.
+
+Where do good conjectures come from, though? From creativity. And creativity never grows in a vacuum. It grows out of culture.
+
+Culture, like gravity, is mostly invisible. You spot it only by what it bends: how people act, what they notice, how they treat one another. Beneath the behaviour lie shared beliefs, values, norms, and habits, quietly deciding what a group is able to see.
+
+So read the actions backwards, to the values that drive them—the “why” behind the “what”—with the same patient detective work that scientists apply to nature. Remember that human creativity evolved alongside our need to live together in groups. Innovation was never a lone-genius trait. We built it together.
+
+\SubHead{Uncovering cultural needs}
+
+Culture has an obvious surface: language, food, fashion, buildings, customs. It is easy to photograph and easy to document.
+
+The interesting part lies underneath. There you find the deeper, mostly unspoken \textbf{cultural needs}: the shared expectations that create belonging and psychological safety. Nobody hands you a manual for this layer. You absorb it by living in it, and you feel it instantly when somebody breaks it. Etiquette is the classic case. There is no written rulebook, yet every violation is obvious to everyone in the room.
+
+Spotting those hidden needs is where real innovation begins. An idea can be brilliant and still fail if it clashes with the worldview of the people meant to use it. Ship a technical marvel that offends a core value, and people will resist it—often without being able to tell you why. Acceptance is never only about features. It is about whether the thing \emph{belongs} in their world.
+
+So how do you see what nobody says? Mostly by paying as much attention to what is missing as to what is loud. Forget the exhaustive catalogue of quirks. Bring curiosity and genuine compassion instead. Take unspoken needs as seriously as stated ones, and new ways of solving the problem start to appear.
+
+\begin{pullquote}
+First, the creative idea or product must be novel or original, and second, it has to be useful or adaptive to at least a segment of the population.
+\QuoteAttrib{Shelley Carson, Your Creative Brain \cite{carson12}}
+\end{pullquote}
+
+Two hurdles, then, and an idea must clear both: \textbf{novelty and usefulness}.
+
+The second hurdle is the slippery one. Usefulness is not an objective property of the idea. It is a verdict, handed down by a culture. What one group treasures, another may ignore or reject outright.
+
+Culture's grip goes deeper still. It does not just filter inventions after the fact; it steers which ideas get invented in the first place. People rally behind ideas that fit their beliefs, hopes, and identity. Innovation is never purely rational, which is exactly why the same technology can flourish in one society and quietly stall in another.
+
+Keeping an ear on cultural shifts is therefore not a marketing hobby. Long before a shift shows up in a trend report, it surfaces as small changes in language, fashion, and social behaviour. Catch those signals early, and you can anticipate a need as it forms. Miss them, and a competitor gets there first.
+
+\begin{pullquote}
+Identifying the next big thing is often treated as an exercise in analyzing trends. But that's misleading. By the time a trend is established, any opportunities it presents have probably been captured by competitors. And although a company may need to reflect trends in its business plans, that may mean catching up with rivals rather than gaining a competitive edge. To take advantage of emerging trends, companies must identify them when they are embryonic---not purely speculative, but not yet named or widely known. At that stage the signs will be merely anomalies: weak signals that are in some way surprising but not entirely clear in scope or import. Most anomalies don't become meaningful trends, of course. But some do---and the businesses that identify and interpret them early will steal a march on the competition.
+\QuoteAttrib{Martin Reeves, Bob Goodson, and Kevin Whitaker, The Power of Anomaly \cite{reeves21}}
+\end{pullquote}
+
+The next breakthrough, then, is not found by chasing trends. It is found by noticing faint, awkward signals while they are still faint and awkward. That takes a tolerance for ambiguity, and a willingness to question conventional wisdom.
+
+Scientists and innovators turn out to be playing the same game. One side conjectures invisible physical laws; the other uncovers invisible cultural needs. You cannot touch culture any more than you can touch gravity. Yet both shape everything that happens.
+
+\SubHead{Friction before requirements}
+
+Now bring all of this home to software.
+
+Long before anyone writes a user story, reality is already sending signals. But nobody experiences those signals as tidy “requirements.” People experience them as \textbf{friction}.
+
+You know the symptoms. Engineers keep rerunning the same manual workaround script. A meticulous report is generated every Monday and ignored every Tuesday. The same argument comes back sprint after sprint under a fresh ticket ID. Everyone obeys an unwritten rule that nobody can quite put into words.
+
+Most teams treat this friction as noise to be suppressed, or they name it immediately with the first word lying around—\code{Order}, \code{Customer}, \code{Ticket}—and move on.
+
+Both reactions end the listening. The first throws the evidence away; the second hides it beneath a familiar noun, and once that noun lands in code it hardens into infrastructure.
+
+\SubHead{Where language begins: chaos}
+
+Language does not start with words. It starts in \textbf{chaos}.
+
+Not the “production is on fire” kind of chaos. The older, philosophical kind: one undivided field, before anybody has drawn a single line through it.
+
+Try a thought experiment. Imagine your eyes could take in the entire electromagnetic spectrum at once—radio, infrared, visible light, X-rays. Would the world snap into sharper focus? Quite the opposite. You would be blinded by the overload. Perception works precisely because it picks one narrow band of reality and ignores the rest. Every word we use records a selection like that.
+
+A modelling team makes the same kind of selection. You carve a manageable region out of the mess and agree, together, to call that slice your context. Only \emph{after} the cut can you ask what lies inside. Is it clear, complicated, or complex?
+
+Never pretend the cut is neutral, though. Your team's past bugs, its incentives, and its favourite tools all pull on where the line falls. Every act of understanding begins exactly like this: with a choice about what to include, what to ignore, and what counts.
+
+None of this makes chaos a bug to be fixed. Chaos is the background \emph{against} which patterns can appear at all. It holds the complex, the complicated, and the clear all jumbled together, long before anyone sorts them. Those three are ways of organising experience, not separate planets. In that sense, chaos resembles the Dao: not one more thing among things, but the fertile ground from which things emerge.
+
+In Domain-Driven Design, your first cut out of chaos is the rough sketch of a \emph{bounded context}: the patch of ground where a model and its language will one day be allowed to mean one thing.
+
+\Checkpoint{CONTEXT CHECK}{\textbf{What did we exclude when drawing the first cut?} Clarity does not come from seeing everything. It comes from making useful distinctions while staying aware of what they leave out.}
+
+Notice where the cut leaves you: right back at the start of this movement, holding effects without causes. Things fall while gravity hides. Machine learning finds correlations it cannot explain.
+
+Silence is the honest state of a team that has effects in hand and no words yet for their causes.
+
+\SubHead{Why people on the floor can't just “tell you the requirements”}
+
+Domain knowledge is messy for the same reason physics is. Behaviour floats on the surface. Expectations live underground.
+
+Every team has seen the evidence. The private spreadsheet kept alive beside the official ERP. The polished BI dashboard nobody opens. The rule every operator follows that appears on exactly zero Confluence pages.
+
+Ask the expert to state the rule, and you will often get a blank stare. Not because they are hiding it, but because it was never a rule. It grew up as a habit that worked. Ask three warehouse schedulers why a shipment cannot leave on a Friday, and you may hear three conflicting stories. Each holds one true shard of an expectation the group never had to spell out—until software arrived and demanded a sentence.
+
+This is where engineers keep tripping. \textbf{Usefulness is a verdict passed by the community, not a property of your architecture.} Clean, well-tested code can still fail if it fights the way people actually work. Meanwhile, the first handy noun on a backlog ticket—\code{Shipment}, \code{Ticket}—gets promoted to entity, microservice, and database table before anyone stops to ask whether it was the right cut. \textbf{Once a guess enters the schema, it stops looking like a hypothesis and starts behaving like concrete.}
+
+Hence the order of operations. A complex domain must stay in \textbf{Tong}—events, relationships, open language—long before anyone locks in \textbf{Dui}: classes, enums, database schemas.\\
+
+\textbf{Event sourcing has this rhythm in its bones. It keeps the stream of what happened intact and lets read-side projections slice it differently as understanding matures.}
+
+So here is the discipline. Stay in Silence long enough to point at the friction without lunging to fix it, and treat whatever you point at as evidence.
+
+In practice, start with a provisional cut. Fence off one region of the problem. Write down what is inside and, just as carefully, what you are deliberately leaving out. Treat it as a working assumption, not yet a permanent boundary.
+
+Then listen inside the fence.
+
+The brain-as-predictor picture tells you what to listen \emph{for}. A team carries expectations; that is its model. Reality hands back evidence. The gap between the two is a \emph{prediction error}, and friction is simply what a prediction error feels like at team scale.
+
+\Figure{f01b_prediction_loop}{0.94\linewidth}{The prediction-error loop behind every complaint. Friction is the gap between what the team's model expected and what reality actually did. Close the loop by updating the model—or break it by suppressing the signal or naming it prematurely.}
+h
+Trace the loop once, and you will start seeing it everywhere. A team quietly predicts: \emph{this report will be read; this handoff will hold; the warehouse works like this.} Reality replies with a workaround here, a late shipment there, a meeting that keeps getting renamed. Wherever prediction and reality collide, friction leaks out: irritation, delay, duplicated effort, and a quiet contempt for a process everyone still obeys.
+
+There is only one healthy way to close the loop. The team updates its model—a word, a boundary, an assumption—instead of piling more pressure on the people absorbing the mismatch. Then prediction begins again, a little less innocent than before.
+
+Friction is therefore not the opposite of knowledge. Properly heard, it is knowledge arriving early, before it has learned how to phrase itself as a requirement.
+
+Two cautions before you run with this. First, weigh evidence by its reliability, not its volume. Confidence is not truth, and a loudly held expectation can be dead wrong. Second, ambiguity is an open invitation, and expectations rush to fill every blank. Watch an eager team meet an unnamed problem, and you can see the rush happen in real time.
+
+\textbf{Friction is evidence, not yet a name.} Most anomalies are harmless noise. A few reveal cracks in your vocabulary: reality doing something your domain language simply cannot say yet. Stuff the first familiar noun into such a crack, and you hide it instead of explaining it.
+
+Good naming works the other way round. Putting a feeling into words measurably loosens its grip \cite{lieberman07}. Putting friction into a sharp sentence does the same for a team: a vague discomfort becomes an object you can inspect, discuss, and address. Compare “this feels bad” with “I am concerned because the acceptance criteria are ambiguous and could lead to a dispute.” That second sentence is where the next movement begins; Silence is the discipline of not reaching for it too early.
+
+\SubHead{A culture can hold a need before a person can state it}
+
+Why do these needs stay unspoken? Because no single person owns them. They live \emph{between} people.
+
+Think back to the two layers of culture: the surface you can document (language, food, buildings, rituals) and the unspoken expectations beneath it that create belonging and safety. Etiquette is the everyday exhibit: no rulebook, real power.
+
+Every serious domain has that lower layer too. It is why the expert cannot quote the rule: the rule was only ever a habit that worked. It is also why technical quality and usefulness drift apart. Quality you can inspect at your desk. Usefulness is judged out there, by a community, and the verdict can flip at a single team boundary. So when you ask what the domain needs, part of the answer concerns \emph{values}—and values are precisely what nobody writes on the ticket.
+
+\SubHead{Anomalies arrive before trends}
+
+If needs surface late, where should you look for early signals?
+
+Not at trends. As Reeves, Goodson, and Whitaker argue, by the time something qualifies as a trend, many of its opportunities have already been claimed \cite{reeves21}. The useful signals arrive earlier and look worse: anomalies, weak, surprising, and not yet named.
+
+Most anomalies are noise, and you can let them go. The rare ones worth holding open are the cracks in your vocabulary. Hold them open: naming an anomaly in a hurry does not explain it; it hides the signal under a familiar noun.
+
+\begin{aside}[FAILURE MODE: THE PREMATURE NOUN]
+The first noun that fits the backlog becomes the entity, the aggregate, the service, and the table. It arrives before anyone has checked whether it is the right cut. \textbf{Once the noun enters the schema, it stops looking like a hypothesis and starts behaving like infrastructure.}
+\end{aside}
+
+\Checkpoint{LANGUAGE CHECK}{\textbf{Are we naming the anomaly too quickly?} An unnamed effect cannot yet be challenged, bounded, or built. Hold it open until the domain, not the backlog, supplies the word.}
+
+\begin{devnote}
+Before you name it, point at it. Keep a friction log: the workaround script, the unread report, the argument that returns every sprint. For each entry, write what the team expected and what happened instead, and resist giving it a noun. Silence ends when the domain offers a word that explains the friction rather than covering it.
+\end{devnote}
+
+Silence earns its keep only if it ends. Sooner or later somebody has to risk words: say which capability is missing, say why it is missing, and say what would prove that explanation wrong. That sentence is where the semantic model begins—and it is also where the oldest temptation in engineering returns. The moment a sentence exists, someone wants to type it.
+
+% =============================================================================
+% MOVEMENT 2 -- SENTENCE
+% =============================================================================
+\MovementOpen{2}{Sentence}{A need that could be wrong.}{The semantic model: specify the world before encoding it.}
+
+\Topic{Don't think in code}
+
+Every model in this guide has the same simple shape. A \textbf{model} rests on a \textbf{context}, and the context is a slice cut out of \textbf{reality}.
+
+Inside its context, the model holds. Step outside, and the model has nothing to say. Keep that picture in mind; this whole movement hangs on it.
+
+\Figure{f01_model_context_reality}{0.55\linewidth}{Model, context, reality. The hatched disc is the model, the grey plane beneath it is the context where it holds, and the large ground plane is reality. The dotted footprint marks what the context covers—and everything it leaves out.}
+
+Now watch what happens when you show that shape to developers. Mention a DDD concept, and the room leaps straight to an implementation.
+
+To be fair, in clear and complicated systems the leap often works. Each layer maps neatly onto a layer of the machine. The model becomes code or mathematics, the context becomes the framework, and reality becomes the physical machine     .
+
+\Figure{f02_direct_mapping}{0.95\linewidth}{The direct shortcut that works in clear and complicated systems. Model maps straight to code or mathematics, context to framework, reality to the physical machine—with almost nothing lost in translation.}\label{fig:direct}
+
+The trouble lies in everything that tidy shortcut hides.
+
+Consider an honest split of your working life. Roughly ninety percent of software engineering is modelling human reality in precise language; only the remaining ten percent is encoding that model into bits. Reducing the job to writing code drops the middle column—and with it, meaning.
+
+Between reality and implementation stands a third column, and it changes everything: \textbf{language}.
+
+\Figure{f03_three_columns}{\linewidth}{Three columns instead of two. Left: reality as it is. Middle: the same shape held in language—a model and a context over \emph{human} reality (the semantic model). Right: code or mathematics inside a framework on a physical machine (the executional model). Language is carried by implementation without becoming it.}\label{fig:threecol}
+
+In complex systems, that middle column is where the real work happens.
+
+The Daoist shorthand applies again: spend far more time in \textbf{Tong}(ue) than in \textbf{Dui}(ng). Talk, connect, and name first; classify and build later. Event sourcing lives by the same rule. It keeps the stream of events open and lets projections make their cuts afterwards. Neural networks do it too: hidden layers hold fluid, overlapping features (fur, edges, textures) in Tong, and only the final output layer forces a crisp label (\code{cat} vs.\ \code{dog}) in Dui. The label is the end of the pipeline, not the model of the world.
+
+Think your team is immune? Try an experiment. Drop a DDD word into an engineering room—\emph{aggregate}, \emph{bounded context}, \emph{domain event}—and start a stopwatch. Before you finish the sentence, someone will be drawing a class diagram, naming a Kafka topic, or sketching a database table. The room simply cannot help itself.
+
+In predictable territory, that reflex does little harm. Where cause and effect are settled, the two-column shortcut of Figure~\ref{fig:direct} is perfectly reasonable. A \code{TaxCalculator} module really \emph{is} the model. The framework really \emph{is} the context. The server is the reality. Almost nothing gets lost in translation.
+
+Complex systems are another story. Requirements move, human habits matter, and cause and effect become clear only in hindsight. Here, skipping straight to code deletes the very layer that matters most. Reality refuses to be squeezed into two columns and fans out into the three of Figure~\ref{fig:threecol}.
+
+The \textbf{semantic column} holds the model as language, the context as boundaries, and human reality as lived habit. The \textbf{executional column} holds code and mathematics as implementation, the framework as runtime host, and the physical machine: CPU, memory, network.
+
+Arrows run across each row, never innocently: language must be implemented without being mistaken for its implementation, a boundary must be hosted without being defined by its host, and human habit must be carried by hardware without being reduced to it.
+
+The middle column is therefore not decoration between domain and code. It is where the team decides what the other two columns are \emph{for}. When we rush to “think in code,” we delete the middle column—and the middle column is where meaning lives. A statement can be meaningful without being executable, and a program can execute flawlessly and still miss its purpose.
+
+\begin{claim}
+Executability shows that a process \emph{can be carried out}. It does not show that the process is \emph{semantically correct}.
+\end{claim}
+
+Want to see exactly where meaning leaks away? Follow a single sentence on its trip from human talk to running software. Along the way it passes through three gates.
+
+\Figure{f03b_gates_loop}{0.96\linewidth}{Three gates and a return path. The domain \(D\) is interpreted into a semantic model \(S\), formalised into a program \(P\), and executed as behaviour \(B\). Surprises in \(B\) are not mere bugs to patch—they are evidence feeding back into \(S\).}
+
+\textbf{Gate one: interpret.} The domain \(D\) becomes a semantic model \(S\): a deliberate account of what matters, what the words mean, and which rules are supposed to hold.
+
+\textbf{Gate two: formalise.} \(S\) becomes a program \(P\). Types, data structures, control flow, and error paths sharpen some meanings and silently drop others.
+
+\textbf{Gate three: execute.} \(P\) becomes behaviour \(B\) and finally meets reality: real users, real latency, real data, and every edge case that somehow never came up in the workshop.
+
+Here is the part teams forget: the journey does not end at \(B\). Look at the return arrow. Running code exposes ambiguous wording. Tests expose hidden assumptions. Users invent workarounds. When something turns out to be unexpectedly hard to implement, that is often a sign that the model is incomplete, or aimed at the wrong distinction.
+
+Treat \(D \to S \to P \to B\) as a one-way pipeline, and every surprise becomes a defect to patch; treat it as a loop, and every surprise becomes evidence about the model. The work lives in that loop: interpret, formalise, execute, watch what happens, and then have the courage to revise what you said.
+
+Build the semantic column \emph{before} you open the executional column, and build it out of sentences that could be wrong.
+
+Say the model in ordinary language first. Hand it to a domain expert. They should be able to read your terms, relationships, rules, and invariants, and put a finger on exactly where the model is wrong. At this stage you mostly hold effects, not causes, so hold the vocabulary lightly. A belief you cannot imagine losing is not a hypothesis; it is a preference.
+
+To cross from correlation to genuine understanding, somebody has to propose a \textbf{conjecture}: a testable story about the hidden mechanism behind what everyone can see. Deutsch's words from the first movement now apply to the sentence itself:
+
+Data does not hand you a domain model. You invent a candidate explanation, then expose it to reality to see if it breaks.
+
+\SubHead{The shape of a sentence}
+
+Now turn the friction you observed into an explicit capability gap. Attach the observation that would prove your explanation wrong. And—hardest of all—smuggle no solution into the wording.
+
+Every sentence that leaves this movement carries three lines:
+\begin{itemize}
+  \item \textbf{The need:} the observable capability gap, and what would close it. The need should survive even if the current stack disappears.
+  \item \textbf{The conjecture:} why you think this gap persists today.
+  \item \textbf{Criticism:} hand someone the knife—name the concrete observation that would force you to abandon your explanation. A model that cannot state what would falsify it is just an opinion wearing technical vocabulary.
+\end{itemize}
+
+\begin{devnote}
+You are specifying a world first, and encoding it second. Next time a DDD term drops in a meeting, write down the human distinction it names—and what it explicitly excludes—before creating the file or type that stores it. Leave Sentence with three lines: the need, the conjecture, and the observation that would kill it. If you cannot say what a term refuses to mean, you are already thinking in code.
+\end{devnote}
+
+A good sentence still has no borders. The same word walks from Sales to Finance to Fulfilment, changing its obligations at every border, and integration bugs collect the toll. A sentence needs a place where its words are allowed to mean one thing. Who draws that place, and what must it refuse in order to remain coherent? Bounded contexts are the answer—but only once we stop pretending they are waiting to be found like shells on a beach.
+
+% =============================================================================
+% MOVEMENT 3 -- FRAME
+% =============================================================================
+\MovementOpen{3}{Frame}{A bounded context is a disciplined refusal.}{The boundary: drawn, not found.}
+
+\Topic[Model bounded contexts]{You don't find bounded contexts; you model them}
+
+Open almost any textbook case study, and the bounded contexts are handed down on stone tablets on page one: \emph{Sales}. \emph{Billing}. \emph{Fulfilment}. Neatly boxed and suspiciously tidy.
+
+That is great for teaching and treacherous in real life.
+
+It suggests that bounded contexts exist in the domain the way rocks exist in the ground, waiting for someone with a shovel and an Event Storming board to “discover” them. Teams that go hunting for them usually dig up one of three things: the company org chart, the legacy database schema, or the loudest team's favourite noun. That kind of boundary is only a boundary in the sense that a folder is a boundary. Meaning still leaks across it.
+
+A bounded context is something sharper: a \textbf{disciplined refusal}.
+
+A context is not merely an inventory of what sits inside; it is a decision about which meanings govern this model and which, although perfectly true elsewhere, will not be authoritative \emph{here}. Many bitter arguments about models are really arguments about an exclusion nobody realised had been made.
+
+\Figure{f03c_bounded_refusal}{0.92\linewidth}{A bounded context as a drawn refusal. Inside the fence, Dui holds: words and invariants mean one consistent thing. Neighbouring meanings outside are still true—they just do not rule here. Tong connects the two through explicit translation rather than a messy merge.}
+
+\begin{claim}
+A bounded context is not found; it is modeled.
+\end{claim}
+
+Language and the semantic model do leave clues. The moment the same word starts obeying two conflicting sets of rules, you have evidence for a boundary.
+
+In short, \textbf{the evidence is discovered and the boundary is decided.} Someone still has to decide to draw the line \emph{here}, accept what it excludes, and live with the cost of translating across it. That decision is the modelling act, and it comes before any grammar can be chosen. A boundary without a possible failure is architecture by faith.
+
+\Checkpoint{LANGUAGE CHECK}{\textbf{Which meanings does this context refuse to make authoritative here?} A ubiquitous language is local rather than universal; shared words create clarity only after the team has agreed where each meaning holds.}
+
+\begin{devnote}
+When two teams are both completely right about what a word means and still keep breaking each other's code, you didn't “miss” a bounded context. You haven't drawn the refusal yet. Before announcing the boundary, write one sentence beside it: \emph{“This outside meaning is not authoritative here.”} Then write a second: \emph{“This observation would show the line is in the wrong place.”}
+\end{devnote}
+
+The frame tells us which facts count. It does not yet tell us how boldly we may speak about them. Grammar is the movement in which language starts to harden—into mathematics, into types, into code that runs—and how far it may harden depends on what kind of causal world the frame contains. Some contexts will repeat. Some can be explained. Some can only be learned by touching them carefully and watching what pushes back.
+
+% =============================================================================
+% MOVEMENT 4 -- GRAMMAR
+% =============================================================================
+\MovementOpen{4}{Grammar}{Learn, explain, or repeat.}{Cynefin and the runtime: the nature of the problem decides how we act, and something must carry the act.}
+
+\Topic[Match implementation to context]{Bounded contexts can be clear, complicated, or complex}
+
+A real system never signs up for just one kind of uncertainty.
+
+Inside a single product you will find complex, complicated, and clear contexts living side by side. Each kind calls for a different implementation, and applying the wrong one manufactures complexity that the problem never asked for.
+
+\Figure{f04_system_cynefin}{0.95\linewidth}{One system, three kinds of bounded context. A complex context is a volume, an adaptive network promising “I will learn.” A complicated context is a surface of named parts with traceable links: “I will explain.” A clear context is a line of agreed steps: “I will repeat.”}
+
+Yet every engineering organisation has a favourite hammer.
+
+In one shop, every bounded context gets Clean Architecture with full DDD aggregates. In another, everything becomes an event stream. In a third, everything gets a microservice or a fine-tuned model. The context names change; the implementation pattern stays identical.
+
+In language terms, every sentence is forced into the same grammar, whatever it is trying to say.
+
+Dave Snowden's \textbf{Cynefin framework} \cite{snowden07} offers a way out: diagnose first. Cynefin sorts problems by how cause and effect relate to what we can know. The Welsh word \emph{cynefin} means something like “habitat” or “place of belonging,” which is fitting, because the framework is all about behaving aptly in the terrain you are actually standing on.
+
+For developers, that diagnosis comes \emph{before} any process, pattern, or architecture is chosen. In a \textbf{clear} context, cause and effect are obvious, so you apply established practice. In a \textbf{complicated} one, cause and effect exist but hide, so you need an expert to trace them. In a \textbf{complex} one, cause and effect become visible only in hindsight. The labels sound alike, but they license very different engineering promises.
+
+One warning before you put the framework to work: in DDD, Cynefin is \emph{not} a maturity ladder. Contexts do not dutifully climb from complex to clear. Different contexts in one system—even different steps of a single workflow—can sit in different domains at the same time. And a calm, stable context can be flipped into complexity overnight by one market shift or one new integration, often without any warning at all.
+
+\begin{aside}[THE OTHER TWO DOMAINS]
+Cynefin also names \emph{chaotic} (no time to analyse: act first, stop the bleeding, investigate later) and \emph{disorder} (you do not know which domain you are in yet). A live production outage is chaotic: stabilise first, and resume modelling once the fire is out.
+\end{aside}
+
+The rule of thumb is simple: let the nature of the problem decide the response.
+
+\begin{center}
+\small\renewcommand{\arraystretch}{1.4}\arrayrulecolor{G4}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\sffamily\bfseries}p{27mm}>{\ttfamily\footnotesize}p{34mm}X@{}}
+\toprule
+\textbf{Domain} & \sffamily\textbf{Response} & \sffamily\textbf{Meaning} \\ \midrule
+Clear & sense, categorise, respond & Follow established practice. \\ \midrule
+Complicated & sense, analyse, respond & Use expert analysis and good practice. \\ \midrule
+Complex & probe, sense, respond & Run small experiments, observe, adapt. \\ \midrule
+Chaotic & act, sense, respond & Stabilise first, understand later. \\ \midrule
+Disorder & break it apart & You do not yet know which domain applies, so split the problem into parts you can understand. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Misread the terrain, and you bring the wrong kind of thinking to the job: heavy analysis where small experiments were needed, experiments where someone should have acted an hour ago, rigid checklists where the situation called for judgement.
+
+Lay the domains along a single line of growing certainty, as in Figure~\ref{fig:f04b_cynefin_line}, and something new comes into view: where Tong and Dui each belong. Silence, where every model begins, sits at the far left.
+
+\Figure{f04b_cynefin_line}{0.96\linewidth}{Cynefin laid out by growing certainty, with Tong and Dui pulling underneath. Most modelling failures are not failures of effort—they are sharp Dui verdicts delivered while the situation is still asking for Tong.}
+
+Walk the line from left to right.
+
+At the far left lies \textbf{chaos}: no stable shape yet. Modelling is premature here; stabilise the situation first.
+
+Next comes \textbf{complex}: cause and effect become clear only in hindsight. Probe, sense, respond—and repeat.
+
+Then \textbf{complicated}: the causes are real, but buried deep enough to need specialists. Sense, analyse, respond.
+
+At the far right sits \textbf{clear}: obvious rules and an established recipe. Sense, categorise, respond. Beware the apparent simplicity, though. Plenty of situations look clear from a distance.
+
+Beneath the line, two temperaments pull in opposite directions. \textbf{Tong} stays with connection and flow, listening for what has not yet separated into cases, and its gravity is strongest on the left. \textbf{Dui} draws the distinction, judges correctness, and decides whether something passes or fails, and its gravity strengthens toward the right.
+
+Most modelling failures are not failures of effort; they are acts performed at the wrong \emph{point} on this line—a crisp Dui judgment pronounced while the situation was still asking for Tong.
+
+\Checkpoint{CONTEXT CHECK}{\textbf{What kind of situation are we actually in?} Cynefin is not just a sorting box; it is a reminder that effective action starts by reading the terrain. Before arguing about solutions, agree on what kind of problem you are facing.}
+
+Ignore the terrain, and you create \textbf{domain dissonance}: a gap between the certainty your model \emph{promises} and the certainty reality will actually \emph{back}.
+
+Promise “I will repeat reliably” in a complex problem, and you get confident sprint rituals followed by baffled postmortems. Promise “I will probe and learn” in a clear billing rule, and you get endless workshops where a ten-line function would have done.
+
+The first mistake is far more common and wildly more expensive.
+
+Whatever promise you make, one law constrains it, and cybernetics and learning theory share it:
+
+\begin{pullquote}
+Only variety absorbs variety.
+\QuoteAttrib{after W.\,Ross Ashby, law of requisite variety \cite{ashby56}}
+\end{pullquote}
+
+In plain terms, Ashby's Law of Requisite Variety says that a controller needs at least as many distinct responses as its environment has distinct disturbances. Fall short, and the world simply overwhelms it.
+
+Machine learning's \textbf{VC dimension} \cite{vc71} expresses the same constraint in different clothes. Give a model too little capacity, and it \emph{underfits}: real patterns go unseen. Give it too much, and it \emph{overfits}: it memorises noise and stumbles on the next unseen input.
+
+Translate that to bounded contexts, and the rule writes itself. A context needs enough internal variety for the world it faces—and no more than its team can still understand, explain, and defend in a design review.
+
+\Figure{f04c_variety_curves}{0.92\linewidth}{Ashby's law meets VC dimension. Training error keeps dropping as capacity grows, but error on new data dips into a valley and climbs again. Requisite variety sits in that valley: complex enough for the pattern, simple enough to ignore the noise.}
+
+Figure~\ref{fig:f04c_variety_curves} shows the trade-off as two curves.
+
+The dashed training curve is an incurable optimist. As capacity grows, its error keeps falling, because a flexible enough model can fit any example it has already seen.
+
+The new-data curve is less forgiving. It falls while extra capacity is capturing real structure, reaches a valley where the model is rich enough for the pattern and poor enough to ignore the noise, and then climbs again as the model begins memorising accidents and mistaking them for laws.
+
+Left of the valley lies \textbf{underfit}: too little variety, real patterns missed, a controller surprised by distinctions it cannot represent.
+
+Right of the valley lies \textbf{overfit}: too much variety, noise enthroned, a model that explains its training history beautifully and the next morning badly.
+
+The valley is not a magic number you calculate once. It is a discipline: keep matching.
+
+Set the two fields side by side, and the correspondence is direct. Variety in the environment corresponds to the complexity of the function to be learned. Variety in the controller corresponds to model capacity, which the VC dimension quantifies. Good regulation corresponds to good generalisation on cases nobody showed you.
+
+The shared lesson is \emph{matched complexity}. Not “be complex,” but be complex \emph{enough}—and not one notch more. It also matters which unit has to achieve that match. In this guide, it is the bounded context together with the team that owns it. Chorus will come back to that team.
+
+\Checkpoint{CONTEXT CHECK}{\textbf{What variety does the environment actually present?} Too little internal complexity breaks on edge cases; too much creates instability. Size your system—and the team running it—for the variety it really faces.}
+
+With the frame drawn, it is time to choose the grammar.
+
+Beneath every technology choice sits a more important question: how much certainty are we honestly entitled to claim?
+
+In a chaotic moment, none. Stabilise first; model later. Everywhere else, let the promise shape the solution, the data, and, soon enough, the team that has to carry both.
+
+The data representation follows the same diagnosis. Clear work loves direct shapes: scalars, flat records, lists in a known order. Complicated work reaches for structure: entities, nested records, relations, graphs. Complex work wants highly connected data and a structure that can change without embarrassment when the next probe returns, whereas a clear rule wants the opposite virtue: a model that does not change its mind on a Thursday.
+
+The order of work matters. Classify the causal structure first. Then choose the \textbf{smallest} architecture that can keep the promise.
+
+And do not let the toolbox fool you about which is which: \emph{a list doesn't make a problem clear, classes don't make it complicated, and a neural network doesn't make it complex.}
+
+\begin{stance}{COMPLEX \(\cdot\) ``I will learn.''}{Ink}{\IconVolume}
+Cause and effect show up only after you run things. Your promise is \emph{evidence and adaptation}, not an upfront guarantee. \textbf{Geometric shape:} a \textbf{volume}—an adaptive network. Event networks, safe-to-fail probes, simulations, feedback loops, graph models, and machine learning belong here when high-dimensional signals (images, audio, text, dense telemetry) refuse to be captured by hand-coded rules. Stay honest about the edges, though: a script that copies image files is Clear, and a social workflow built on plain CRUD events can still be Complex.
+\end{stance}
+
+\begin{stance}{COMPLICATED \(\cdot\) ``I will explain.''}{G1}{\IconSurface}
+Cause and effect exist, and a specialist can trace them, even when several good designs compete. \textbf{Geometric shape:} a \textbf{surface}—explicit structure. Components with named roles, crisp interfaces, and traceable collaborations, whether OO aggregates, modular functions, or well-typed services. Think of a radio receiver: filters, estimators, detectors, and configuration objects all obey known mathematics. No single linear script explains the whole receiver, yet an engineer can trace every signal path.
+\end{stance}
+
+\begin{stance}{CLEAR \(\cdot\) ``I will repeat.''}{G2}{\IconLine}
+Cause and effect are settled, and every step has an agreed successor. \textbf{Geometric shape:} a \textbf{line}—a sequence. Scripts, pipelines, state machines, checklists, flat records, and ordered tables. Adding heavy abstractions here does not add safety; it just gives a settled rule extra places to rot.
+\end{stance}
+
+That is \textbf{structural fit} in a single breath: \emph{no less variety than the promise needs, and no more than you can explain.}
+
+When the structure does not fit, the failures are predictable. Stretch a linear script across a complicated domain, and it turns into a tangle of \code{if/else} flags. Bolt a rigid class hierarchy onto a complex domain, and yesterday's categories become tomorrow's blind spots. Wrap rich domain objects around a simple CSV transform, and you add ceremony without adding safety. Throw a neural network at a deterministic tax rule, and you trade a clear answer for a confident black box.
+
+The geometric labels are memory hooks, not formal categories. A line suggests a sequence, a surface suggests structured collaboration, and a volume suggests a living network.
+
+Nor does a domain have to “mature” from one shape into the next. The model simply chooses how much variation it must preserve. Let every bounded context, and every part inside it, keep its own honest promise. A core exploration engine may stay Complex while the tax calculation next door stays Clear.
+
+\Checkpoint{LANGUAGE CHECK}{\textbf{Which promise can this model honestly keep: learn, explain, or repeat?} A modelling stance is a promise: it determines not whether the model is impressive, but what others are entitled to expect from it.}
+
+\begin{devnote}
+Before you reach for aggregates, event sourcing, or an ML model, write your context's promise in one line: \emph{I will learn}, \emph{I will explain}, or \emph{I will repeat}. Then check its variety. A context with too little variety gets steamrolled by edge cases; one with too much cannot explain why it broke when the next case arrives. Keep tests that can still falsify the code.
+\end{devnote}
+
+Grammar has now given the sentence an honest promise and a form that can run.
+
+Then somebody presses Run.
+
+A request times out. A transaction rolls back. A message arrives twice. Suddenly the well-formed sentence discovers that it must \emph{live} somewhere, under rules it never mentioned. Who owns those rules? Where do latency, retries, consistency, and failure sleep at night?
+
+If language is the semantic model, we had better make the runtime that carries it just as explicit—before the framework volunteers to write the grammar for us.
+
+\Topic{Make the runtime explicit}
+
+Most DDD books start the story late.
+
+They open inside a bounded context that is already deep in \textbf{Dui}: cut, named, and furnished with tidy entities and rules, as if the domain model were the first thing ever built. Everything looks pure and self-contained—until you try to run it. Trace the dependencies backwards, though, and two earlier layers come into view.
+
+\Figure{f05_runtime_flow}{0.92\linewidth}{Where DDD books start, and what sits underneath them. Need is grounded in reality and hardware; a runtime (browser or web server) carries the non-functional requirements (NFRs); only then does the domain model (the web app) carry the functional requirements (FRs).}
+
+Machine learning gives the clearest demonstration of this layering. There, the three layers sit so far apart that hardly anyone confuses them.
+
+\Figure{f06_ml_stack}{0.82\linewidth}{Machine learning keeps the three layers crisp. The model lives in Python (\code{train}, \code{eval}, …). The runtime is C++ inside TensorFlow or PyTorch (backpropagation, graphs, scheduling). Reality is the CPU, GPU, and memory doing the arithmetic.}
+
+The layers earn their keep because each can change without impersonating the others. Nobody sane asks whether a CUDA memory allocator believes the image contains a cat. Enterprise software deserves the same courtesy: a discount policy is not a web server, and a timeout is not a business rule merely because both eventually meet in production.
+
+Textbooks often start at the most discussable layer because it photographs well in a lecture. Production incidents are less courteous: they arrive from the skipped layers—from timeouts, retries, process-lifecycle rules, and hardware limits that were never granted a name while everyone admired the aggregates.
+
+Every design therefore carries three different commitments:
+\begin{itemize}
+  \item The \textbf{domain model} carries the \emph{functional requirements}: business rules, invariants, and state transitions—\emph{what} must happen.
+  \item The \textbf{runtime} carries the \emph{non-functional requirements}: latency, retries, transactions, consistency, concurrency, protocols, and process lifecycle—\emph{how running stays dependable}.
+  \item The \textbf{machine} sits underneath both: CPUs, GPUs, memory, disks, and network cards, whose indifference to your elegant model is absolute.
+\end{itemize}
+Each layer speaks its own language. When architecture diagrams leave the runtime implicit, the framework quietly becomes your domain model: an HTTP controller, an ORM lazy-loading session, or a Kafka consumer configuration begins dictating your aggregate boundaries, and the frame you drew in language is redrawn by a lifecycle hook. Every non-functional requirement needs an address; without one, it will eventually be smuggled into domain code as a workaround branch, and the most consequential author of your architecture becomes the one nobody remembers inviting.
+
+\SubHead{The model is valid somewhere, never everywhere}
+
+Three related ideas need to stay distinct.
+
+A \textbf{model} says how you understand reality. A \textbf{context} says where that understanding holds. \textbf{Requirements} say what a running system must do there—and how well, how fast, and how safely.
+
+They are close relatives, but they are not interchangeable. In particular, you cannot derive requirements from the model alone. Purpose, scope, stakeholders, environment, and risk all have their say.
+
+\Checkpoint{LANGUAGE CHECK}{\textbf{Can you read the business sentence in the code that implements it?} If the domain's words have been replaced by the framework's, the runtime is writing your grammar.}
+
+\begin{devnote}
+If you cannot point to the runtime in your design, your non-functional requirements are hiding inside your domain code. Name the host before you argue about the aggregate. Backpropagation is not the model. The controller is not the order.
+\end{devnote}
+
+A named runtime and an honest grammar still do not keep a model alive. Code does not remember why a distinction was drawn; people do. The last movement turns from what the language says to who is able to keep saying it—and it meets a temptation that arrives wearing an org chart.
+
+% =============================================================================
+% MOVEMENT 5 -- CHORUS
+% =============================================================================
+\MovementOpen{5}{Chorus}{A model lives in the people who can speak it.}{Team design: who speaks each model, and when the handoff happens.}
+
+\Topic[Supporting and generic domains]{Supporting and generic domains are not runtimes or platforms}
+
+A domain model does not live in a Git repository; it lives in the people who can still speak it coherently to one another.
+
+Strategic DDD sorts domains into \emph{core}, \emph{supporting}, and \emph{generic}, and is routinely drawn as a vertical layer cake. Look at that diagram for ten seconds and your brain plays an architectural trick on you: \emph{core} sits on top like application code, while \emph{supporting} and \emph{generic} sit underneath like plumbing.
+
+\Figure{f07_platform_wrong}{0.5\linewidth}{The wrong picture. Stacking core, supporting, and generic like floors of a building tricks the eye into treating business importance as stack altitude.}
+
+Organisations then follow the picture. They create a “Platform Team” to own everything below the core line: auth, notifications, billing connectors, Kubernetes, observability, and CI. The runtime vanishes into the same catch-all bucket.
+
+Replace the tower with three side-by-side columns, and the picture straightens out.
+
+\Figure{f08_platform_better}{\linewidth}{The better picture. Core, supporting, and generic sit side by side as three separate domain models—each with its own runtime and its own machine.}
+
+In Team Topologies terms, nobody needs a catch-all platform team. What you need is \textbf{stream-aligned teams}—one per domain model—backed by \textbf{one supporting runtime team} that keeps the shared execution substrate healthy.
+
+Once the runtime has its own name and address, the non-functional requirements become visible, and cognitive load drops across every domain team at once.
+
+Why is the tower so persuasive? Because it is easy to sketch. But look at what it teaches the eye: two genuine domains, demoted to infrastructure. No wonder nobody seems to own their rules.
+
+The distinction itself is simple. Core, supporting, and generic measure \emph{how much competitive difference a domain model makes}. They say nothing about how deep something sits in a tech stack. Domain worth, execution host, and physical hardware are three independent axes, not three floors of one building.
+
+Follow that through. An identity capability can be generic \emph{and} still guard subtle invariants worth modelling carefully. A scheduler can be pure runtime without a word of business vocabulary. A GPU can serve either without acquiring an opinion about customers. Keep the axes apart, and the platform team finally stops being blamed for every unowned concern in the building.
+
+Cognitive load does not shrink when you build the tower. It just moves into a Jira queue.
+
+So keep the vocabulary straight:
+
+A supporting domain is still a \textbf{domain}. A generic domain is still a \textbf{domain}. Each has real concepts, real edge cases, and real reasons to change, and therefore needs a language that some team can speak.
+
+The \textbf{runtime} is something else entirely: the machinery that executes a domain model. The \textbf{machine} is something else again: the hardware underneath. Neither runtime nor hardware is a “lesser domain”—and neither is a landfill for domain models nobody feels like owning.
+
+The word “platform” blurs all three. It rarely tells you what is being run or which rules are being enforced. A team called “platform” can end up owning an identity model, a deployment runtime, \emph{and} a message broker all at once. When something breaks, nobody can say which of the three failed, or which language a newcomer must learn to fix it.
+
+So give \emph{every} domain model a team that speaks it, its own runtime, and its own machine. Yes, that includes the generic ones you buy off the shelf or wrap as shared services.
+
+One test cuts through most arguments: \textbf{Does it have a domain model?} If it has a ubiquitous language, invariants, and business reasons to change, it is a domain model—whether core, supporting, or generic. Those labels describe \textbf{competitive differentiation}, not altitude in a technology stack. The runtime is different: it hosts execution and speaks in mechanics, as a web server, cluster scheduler, message broker, training loop, or projection host. The machine is different again: physical or virtual compute, made from CPU, GPU, memory, and network. These are three axes, not three floors of one building.
+
+Team design follows the same cut \cite{skelton19}. Stream-aligned teams own domain models and speak their languages. A supporting runtime team keeps a shared execution host running for everyone, without quietly adopting anyone's business logic. Calling that team “platform” does not turn identity management into a runtime concern, and calling a generic domain a “platform” does not magically delete its business model. Once the runtime has its own explicit place, non-functional requirements finally have a real address, and domain teams stop carrying hosting complexity in their heads because the host has its own clear boundary.
+
+\begin{devnote}
+Whenever someone labels a component or a team “platform,” ask three questions: \emph{Where is its domain model, who speaks it, and where is its runtime?} A domain model without an explicit runtime hides its non-functional requirements inside business code. A runtime with a hidden domain model leaks its vocabulary into every service it hosts. A model nobody can speak has already started to rot.
+\end{devnote}
+
+\Topic[Agile over time]{Read the Agile Manifesto over time}
+
+A chorus that can speak the model restores honesty to a single snapshot, but software does not live in snapshots. The model that deserved a stream-aligned team this spring becomes legacy by winter; the runtime that felt like bedrock becomes the migration nobody can schedule; a generic capability grows teeth and turns out to matter strategically after all. Every sentence from the earlier movements is stamped with an invisible date. Time, it turns out, is not the medium in which the conversation merely happens; time is one of the materials it is made from.
+
+Yet organisations keep reaching for frozen tools: one fixed process, one hierarchical team, one current-state database, all expected to govern every version forever.
+
+\Figure{f09_versions}{\linewidth}{Versions over time. Early versions (\code{v1}, \code{v2}) live in Tong: Scrum, a networked team, and fast feedback. Later versions (\code{v3..vn}) live in Dui: no Scrum needed, and hierarchy can protect what has settled. Over time, the Agile Manifesto hands over from left to right—while Ashby's law insists the team's variety match the version on both sides.}
+
+Picture a system's life as a sequence of versions, each pairing a model with its context: \code{v1}, then \code{v2}, and onward toward a settled \(v_n\).
+
+\textbf{Early versions (\code{v1}, \code{v2}) live in Tong.} The language is still shifting. Guesses about the runtime are unproven. Assumptions are cheap to throw away, and users keep surprising you in ways that actually help. This is where tight feedback loops earn their keep—Scrum, rapid prototypes, daily conversations—to keep reality from embarrassing your first guess.
+
+\textbf{Later versions (\code{v3..vn}) live in Dui.} Not because exploration was childish, but because this particular knowledge has \emph{earned} its form. The distinctions here have survived hard criticism. Contracts settle down. Automation hardens. Plans turn into promises, and a steady cadence replaces permanent discovery.
+
+Two caveats come with this picture. Different contexts cross the border at different times, so no single switch flips the whole system. And the crossing is not one-way: a shift in the market, the law, or the technology can push a settled context straight back into Tong.
+
+Freezing \code{v1}'s looseness onto \code{vn} creates chaos; forcing \code{vn}'s bureaucracy onto \code{v1} strangles discovery before it starts.
+
+\SubHead{Understanding evolves, but not in a straight line}
+
+Understanding never arrives fully formed. It grows the way it always has: we spot a pattern, test a reading, redraw a boundary. (That is also why requirements “change” in the middle of a build. They were never finished growing.)
+
+Sometimes the journey runs in the expected direction. Chaos reveals patterns worth probing, probing settles into expert analysis, and analysis eventually settles into routine.
+
+But treat that sequence as a lens, not a law of nature. Complex things do not automatically grow up into complicated ones, and complicated things are under no obligation to become clear. A placid system can turn complex the week its environment shifts. And every team has lived the reverse: a seemingly complex mystery that turns out to be one broken cable.
+
+Understanding advances, stalls, and slides backwards. Cosmology offers a loose picture of the same rhythm: structure emerged gradually from conditions with no familiar structure at all, not from a single master blueprint. Take the analogy lightly, but take its lesson seriously. Order can emerge from whatever currently resists explanation, and emergence never switches change off.
+
+\Checkpoint{CONTEXT CHECK}{\textbf{Has the context changed since we classified the situation?} Understanding is not the elimination of chaos but the ongoing creation of workable order in a changing world, including the re-checking of the classification when the context moves.}
+
+Why do we keep missing this rhythm? Because we read the Agile Manifesto \cite{beck01} as a timeless ideology, a permanent preference for the left-hand column:
+
+\begin{manifesto}{THE AGILE MANIFESTO}
+\Pair{Individuals and interactions}{over}{processes and tools}
+\Pair{Working software}{over}{comprehensive documentation}
+\Pair{Customer collaboration}{over}{contract negotiation}
+\Pair{Responding to change}{over}{following a plan}
+{\small\sffamily\color{G2}While there is value in the items on the right, we value the items on the left more.}
+\end{manifesto}
+
+Now read that last line again, slowly. The manifesto \emph{already} says that \emph{“there is value in the items on the right.”} What it never drew was the \textbf{clock}.
+
+Put the clock back, and the manifesto becomes a document about language. The left column is a conversation that is still alive. The right column is what that conversation leaves behind once it settles. As a model earns its stability, the weight naturally slides from left to right:
+
+\begin{manifesto}{A TEMPORAL READING}
+\Pair{Individuals and interactions}{hand over to}{processes and tools}
+\Pair{Working software}{hands over to}{comprehensive documentation}
+\Pair{Customer collaboration}{hands over to}{contract negotiation}
+\Pair{Responding to change}{hands over to}{following a plan}
+\end{manifesto}
+
+That handover is not a betrayal. It is a shift in emphasis, governed by one strict ethic: \emph{the chorus may only write down what it has actually earned.}
+
+Early on, left-hand values do the heavy lifting while a conjecture can still be killed cheaply. Later, right-hand values lock in the survivors, so nobody has to rediscover the same invariants every sprint. Applying yesterday's discipline to today's version is how static hierarchies fail systems in motion.
+
+A fair warning: the rewrite above exaggerates on purpose. The left-hand Agile values do not expire; they simply stop pretending to be the whole of engineering. Individuals and interactions keep mattering while processes and tools bring consistency and scale. Working software remains the proof, even as documentation preserves the knowledge. Customer collaboration keeps deepening understanding while contracts pin down commitments. Responding to change keeps you nimble while plans make dependencies visible.
+
+The right blend always depends on context. A prototype exploring an uncertain market needs room to change. A safety-critical system needs verification, traceability, and formal approval from day one. And remember why Agile exists at all: it rose up against rigid, sequential methods that were being forced onto problems that would not sit still. Its mission was responsive feedback, not the abolition of structure.
+
+Now look down, because the very same timing trap is waiting in your database.
+
+A classic current-state table is pure \textbf{Dui}: a single frozen snapshot of what we currently judge to be true. The domain's history is \textbf{Tong}: an unbroken flow of what actually happened. Store nothing but the latest row, and every policy change forces you to overwrite the past—because you never separated \emph{facts} from \emph{interpretation}, what was said from how it is currently read.
+
+So match your discipline to the version in front of you, and preserve the flow until a cut has genuinely been earned.
+
+Three kinds of respect follow, each about timing and flow.
+
+\textbf{Respect timing in process.} While model and runtime are still moving, protect the feedback: direct conversation, prototypes, customer feedback, quick pivots. Once a boundary has survived real criticism, hand the load to stable mechanisms: automated tests, documentation, SLAs, plans. And keep watching. The moment a “clear” product runs into an uncertain market shift, it drops straight back into Tong, whatever the process chart in the wiki says.
+
+\textbf{Respect timing in conversation.} Hold variety while you are still learning the sentence; let structure copy the sentence after criticism has had a chance to kill it. Keep communication dense and networked while boundaries are moving, and only \emph{after} a boundary survives testing should stable ownership and hierarchy crystallise around it to protect it. Stream-aligned teams carry the domain models, supporting teams carry the shared runtimes (as the previous section showed), and the temporal manifesto completes the handoff: left-hand values keep the sentence open, and right-hand values guard whatever survived.
+
+\textbf{Respect flow in architecture.} Two Daoist ideas map neatly onto event-driven DDD. \textbf{Wu wei} is usually translated as “non-action,” which can sound like an excuse for doing nothing. Read it as an engineer instead: \emph{acting with the grain of the terrain rather than forcing it}. Follow the domain's own sequence of changes before forcing it into premature database tables, and intervene exactly where an invariant or a business decision truly lives. \textbf{Shi fei}—“this is so” and “this is not so”—adds a reminder that right and wrong are always judged from a perspective. A read model, then, is a context-bound reading of history: useful, testable, and never the whole objective truth.
+
+In practice, you already know the toolkit: \textbf{Event Storming} first, then \textbf{event sourcing and projections}. Reconstruct what actually happens, in domain language and in the past tense: \code{OrderPlaced}, \code{PaymentCaptured}, \code{ShipmentDispatched}, \code{RefundIssued}. These are past-tense sentences, the tense of Grammar hardened into a record. Keep that history intact, and let every bounded context project the view it needs. A projection \emph{serves} a context; it is not a context itself. It is one purpose, reading one shared story in its own way.
+
+\Figure{f09b_event_projections}{0.96\linewidth}{One append-only history (Tong), many purpose-specific projections (Dui). Nobody has to agree on a single meaning of an order to agree on what happened—and when a policy changes, each context rebuilds its view without rewriting the past.}\label{fig:projections}
+
+Take a moment with Figure~\ref{fig:projections}, and notice how cleanly facts separate from readings. Nobody has to agree on what the story \emph{means} in order to agree that those four events happened.
+
+Meaning enters only when a purpose makes its cut. Finance cuts revenue, refunds, tax, and liability out of the stream. Logistics cuts fulfilment state: pick, pack, move, recover. Support cuts the moral timeline—promises made and promises kept—which suddenly matters a great deal when a customer asks why Tuesday's promise was no longer true by Friday.
+
+These projections are not rival truths fighting for a throne; they are purpose-specific interpretations, each rebuildable from the shared history when a rule changes. Keep the history intact, and a new definition of lateness can rewrite the report without falsifying the past. Collapse history into today's preferred table, and every future reinterpretation becomes either archaeology or amnesia.
+
+The payoff of this separation shows up the day a rule changes. Suppose the company decides that weather delays no longer count as “late deliveries” for carrier penalties. With only current-state rows, you face two bad options: corrupt the historical reports, or write brittle one-off migration scripts.
+
+With an event stream, the answer is almost boring: \textbf{the history stays untouched, and you simply rebuild the projection under the new rule.} Consequential business decisions and external side effects remain explicit and auditable; interpretations stay disposable and recomputable.
+
+Notice what wu wei and shi fei are really asking for. Not the absence of rules—never that. Just hygiene. Keep three things apart: the historical record, the policies you apply to it, and the views you derive from it.
+
+One honest caveat before we get carried away. Events are still a model; they capture only what your system was designed to notice. Shift the domain deeply enough, and your event definitions—along with the context boundaries around them—must evolve too. Projections, for their part, can harbour bugs, lag behind the stream, or miss exactly the detail tomorrow's question needs.
+
+\Checkpoint{CONTEXT CHECK}{\textbf{Whose purpose and bounded context does this projection serve?} Done right, every context rebuilds its own view when rules shift, while the shared history stays untouched.}
+
+\SubHead{Three kinds of flow, not one}
+
+Why do stories and event logs feel so natural to the human mind? Because they braid together three different kinds of flow—and it pays to pull the strands apart:
+
+\begin{center}
+\small\renewcommand{\arraystretch}{1.4}\arrayrulecolor{G4}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\sffamily\bfseries}p{37mm}XX@{}}
+\toprule
+\textbf{Kind of flow} & \sffamily\textbf{What it means} & \sffamily\textbf{In your system} \\ \midrule
+Physical time & Activity and experience unfold in time. & Timestamps, ordering, latency. \\ \midrule
+Representational sequence & We arrange information in an order, because language is linear. & The event log, a report, a story. \\ \midrule
+Logical progression & One idea follows because it supports or implies the next. & Invariants, causal rules, derivations. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The three tangle easily, because language forces a straight line onto things that exist all at once.
+
+A city exists simultaneously, every street at this very moment. Yet the moment you describe it, you have to choose an order, street after street. A proof works the same way. \(a^2+b^2=c^2\) holds all at once and forever, yet we walk a reader through it step by step, because justifications form a chain. We think in structures, but we explain in sequences.
+
+That is also why stories stick in memory so well. It is not merely that clocks tick inside them. Cause, goal, and setting bind each beat to the next, so every element becomes a cue for the one that follows.
+
+An event log is our shared story. A projection is that story retold for one particular listener. That is what a chorus is: one history, many voices, each allowed to retell it for its own purpose without falsifying what happened.
+
+\SubHead{The loop back to silence}
+
+No version is the last.
+
+A projection stops answering its question. A boundary starts to leak. A promise outlives the team that could keep it. Each of these is fresh friction, and friction is where this guide started.
+
+A mature chorus does not mistake that return for failure. It keeps a friction log right next to its event log, and reads both as evidence about the model.
+
+\Checkpoint{LANGUAGE CHECK}{\textbf{Are we still learning the sentence, or preserving one that survived?} Match your process, team shape, and storage to the version in front of you—and re-check when the context moves.}
+
+\begin{devnote}
+Agility is not the absence of discipline. It is applying the \emph{right} commitment to the version in front of you, and refusing to let yesterday's assumptions dictate tomorrow's cut. Preserve what happened. Make decisions explicit. Rebuild interpretations when rules change. A current-state hierarchy can hold a stable version—it cannot hold the flow that creates the next one.
+
+Then walk the road again, starting from the friction nobody can name yet. Leave \textbf{Silence} with friction worth naming. Leave \textbf{Sentence} with a need and the observation that would kill it. Leave \textbf{Frame} with an explicit refusal. Leave \textbf{Grammar} with an honest promise—\emph{learn}, \emph{explain}, or \emph{repeat}—a named runtime, and tests that can still falsify the code. Leave \textbf{Chorus} with a team whose real conversations can keep that promise, version after version. At every step, what you say is what you will get when it runs.
+\end{devnote}
+
+\begin{claim}
+\textbf{What you say is what you get.} The language you commit to draws the context it is valid in, and code is that language made literal.
+\end{claim}
+
+\Needspace{16\baselineskip}
+Let us end where we began: in the hallway.
+
+A colleague shrugs. \emph{“The order shipped late.”}
+
+Four throwaway words. Listen again, and the whole guide is in there.
+
+There is the \textbf{Silence}: the friction someone felt, week after week, before anyone had words for it.
+
+There is the \textbf{Sentence} it is trying to become. \emph{Which} order? \emph{Whose} lateness? What counts as “shipped”—and what observation would prove our answer wrong?
+
+There is the \textbf{Frame}, refusing authority to neighbouring truths that would corrupt this one.
+
+There is the \textbf{Grammar}, rationing what we may honestly promise, with its runtime carrying that promise through retries, rollbacks, and clocks.
+
+And around it all stands the \textbf{Chorus}: a team either able or unable to keep saying the same thing and mean it, while the history preserves what happened and the interpretations stay free to change.
+
+What you say is what you get—not as a slogan about typing, but as a discipline of attention. Begin in silence, earn the sentence, draw the frame, choose the grammar, and build the chorus that can sing it true.
+
+% =============================================================================
+% REFERENCES
+% =============================================================================
+\clearpage
+\markright{References}
+\phantomsection
+\addcontentsline{toc}{part}{References}
+\SectionTitle{APPENDIX // SOURCES}{References}
+
+\begingroup
+\small
+\renewcommand{\refname}{}
+\setlength{\parskip}{0.35em}
+\begin{thebibliography}{99}
+\setlength{\itemsep}{2pt}
+\bibitem{deutsch11} Deutsch, D. (2011). \emph{The Beginning of Infinity: Explanations That Transform the World}. Viking.
+\bibitem{carson12} Carson, S. (2012). \emph{Your Creative Brain: Seven Steps to Maximize Imagination, Productivity, and Innovation in Your Life}. Wiley.
+\bibitem{reeves21} Reeves, M., Goodson, B., \& Whitaker, K. (2021). The power of anomaly. \emph{Harvard Business Review}.
+\bibitem{lieberman07} Lieberman, M. D., et al. (2007). Putting feelings into words: affect labeling disrupts amygdala activity in response to affective stimuli. \emph{Psychological Science}, 18(5), 421--428.
+\bibitem{snowden07} Snowden, D. J., \& Boone, M. E. (2007). A leader's framework for decision making. \emph{Harvard Business Review}, 85(11), 68--76.
+\bibitem{ashby56} Ashby, W. R. (1956). \emph{An Introduction to Cybernetics}. Chapman \& Hall.
+\bibitem{vc71} Vapnik, V. N., \& Chervonenkis, A. Y. (1971). On the uniform convergence of relative frequencies of events to their probabilities. \emph{Theory of Probability and Its Applications}, 16(2), 264--280.
+\bibitem{skelton19} Skelton, M., \& Pais, M. (2019). \emph{Team Topologies}. IT Revolution Press.
+\bibitem{beck01} Beck, K., et al. (2001). \emph{Manifesto for Agile Software Development}. \url{https://agilemanifesto.org}
+\end{thebibliography}
+\endgroup
+
+\end{document}
